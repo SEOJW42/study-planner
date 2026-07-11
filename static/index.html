@@ -11,8 +11,8 @@
             --bg-main: #f2f2f7;
             --bg-card: #ffffff;
             --text-main: #000000;
-            --text-sub: #666666;
-            --border: #eeeeee;
+            --text-sub: #8e8e93;
+            --border: #e5e5ea;
             --nav-bg: #ffffff;
             --icon-stroke: #8e8e93;
             --icon-active: #000000;
@@ -31,89 +31,90 @@
             --cal-cell: #2c2c2e;
         }
 
-        body { font-family: -apple-system, sans-serif; margin: 0; background-color: var(--bg-main); color: var(--text-main); padding-bottom: 90px; user-select: none; transition: background-color 0.3s, color 0.3s; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: var(--bg-main); color: var(--text-main); padding-bottom: 90px; user-select: none; transition: background-color 0.3s, color 0.3s; }
         
-        .header { padding: 20px 20px 10px 20px; background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.3s; }
-        .header-title { font-size: 22px; font-weight: bold; letter-spacing: -0.5px; }
+        .header { padding: 24px 20px 12px 20px; background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.3s; }
+        .header-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
         
-        /* 날짜 네비게이터 */
-        .date-navigator { background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 20px 20px; margin-bottom: 15px; border-bottom: 1px solid var(--border); transition: background-color 0.3s; }
-        .date-navigator button { background: none; border: none; font-size: 18px; color: #007aff; cursor: pointer; padding: 5px 15px; font-weight: bold; }
-        .date-text { font-size: 16px; font-weight: bold; color: var(--text-main); }
+        /* 날짜 네비게이터 (간격 및 여백 최적화) */
+        .date-navigator { background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 24px 20px; margin-bottom: 16px; border-bottom: 1px solid var(--border); transition: background-color 0.3s; }
+        .date-navigator button { background: none; border: none; font-size: 20px; color: #007aff; cursor: pointer; padding: 8px 16px; font-weight: 600; }
+        .date-text { font-size: 17px; font-weight: 600; color: var(--text-main); }
 
-        .view { display: none; padding: 0 20px 10px 20px; }
+        .view { display: none; padding: 0 20px 20px 20px; }
         .view.active { display: block; }
 
-        /* 스와이프 및 아이템 */
-        .task-wrapper { position: relative; margin-bottom: 10px; border-radius: 12px; background: transparent; overflow: hidden; }
-        .swipe-actions { position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center; flex-direction: row; gap: 8px; padding-right: 10px; }
-        .swipe-btn { height: 75%; border: none; border-radius: 8px; color: white; padding: 0 15px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        /* 스와이프 및 아이템 (카드 내부 여백 확대) */
+        .task-wrapper { position: relative; margin-bottom: 12px; border-radius: 14px; background: transparent; overflow: hidden; }
+        .swipe-actions { position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center; flex-direction: row; gap: 8px; padding-right: 12px; }
+        .swipe-btn { height: calc(100% - 24px); border: none; border-radius: 10px; color: white; padding: 0 16px; font-weight: 600; font-size: 15px; cursor: pointer; }
         .swipe-edit { background: #8e8e93; }
         .swipe-delete { background: #ff3b30; font-size: 18px; }
 
-        .task-item { position: relative; z-index: 2; background: var(--bg-card); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.3s, background-color 0.3s; }
-        .task-info { display: flex; flex-direction: column; }
-        .task-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: var(--text-main); }
-        .task-time { font-size: 14px; color: var(--text-sub); font-variant-numeric: tabular-nums; }
-        .task-actions { display: flex; align-items: center; gap: 15px; }
-        .play-btn { background: #007aff; color: white; border: none; width: 44px; height: 44px; border-radius: 22px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-        .stop-btn { background: #ff3b30; }
-        input[type="checkbox"] { width: 24px; height: 24px; accent-color: #34c759; }
+        .task-item { position: relative; z-index: 2; background: var(--bg-card); padding: 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s; border: 1px solid var(--border); }
+        .task-info { display: flex; flex-direction: column; justify-content: center; }
+        .task-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
+        .task-time { font-size: 15px; color: var(--text-sub); font-variant-numeric: tabular-nums; }
+        .task-actions { display: flex; align-items: center; gap: 16px; }
+        .play-btn { background: #007aff; color: white; border: none; width: 46px; height: 46px; border-radius: 23px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,122,255,0.3); }
+        .stop-btn { background: #ff3b30; box-shadow: 0 2px 5px rgba(255,59,48,0.3); }
+        input[type="checkbox"] { width: 26px; height: 26px; accent-color: #34c759; }
 
-        /* 캘린더 */
-        .cal-wrapper { background: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; margin-top: 15px; transition: background-color 0.3s; }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .cal-header button { background: none; border: none; font-size: 20px; color: var(--text-main); cursor: pointer; padding: 10px; }
-        .cal-day-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 8px; }
-        .cal-day-name { text-align: center; font-size: 12px; font-weight: bold; color: #8e8e93; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .cal-cell { aspect-ratio: 1/1; background: var(--cal-cell); border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; cursor: pointer; border: 1.5px solid transparent; transition: background-color 0.3s; }
-        .cal-cell.empty { background: transparent; cursor: default; border: none; }
-        .cal-cell.success { border-color: #34c759; background: rgba(52, 199, 89, 0.15); }
-        .cal-cell.fail { border-color: #ff3b30; background: rgba(255, 59, 48, 0.15); }
-        .cal-date-num { position: absolute; top: 4px; right: 6px; font-size: 13px; font-weight: bold; color: var(--text-main); }
-        .cal-record { font-size: 11px; font-weight: bold; color: var(--text-sub); padding: 2px 6px; border-radius: 8px; }
+        /* 캘린더 (여백 최적화) */
+        .cal-wrapper { background: var(--bg-card); border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; margin-top: 16px; transition: background-color 0.3s; border: 1px solid var(--border); }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 19px; font-weight: 700; }
+        .cal-header button { background: none; border: none; font-size: 22px; color: var(--text-main); cursor: pointer; padding: 8px; }
+        .cal-day-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 10px; }
+        .cal-day-name { text-align: center; font-size: 13px; font-weight: 600; color: #8e8e93; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .cal-cell { aspect-ratio: 1/1; background: var(--cal-cell); border-radius: 10px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 6px; cursor: pointer; transition: background-color 0.3s; }
+        .cal-cell.empty { background: transparent; cursor: default; }
+        .cal-cell.success { background: rgba(52, 199, 89, 0.15); }
+        .cal-cell.fail { background: rgba(255, 59, 48, 0.15); }
+        .cal-date-num { position: absolute; top: 6px; right: 8px; font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .cal-record { font-size: 12px; font-weight: 700; color: var(--text-sub); padding: 2px 6px; border-radius: 8px; }
         .cal-record.success { color: #34c759; }
         .cal-record.fail { color: #ff3b30; }
-        .detail-card { background: var(--bg-card); padding: 15px; border-radius: 12px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background-color 0.3s; }
+        .detail-card { background: var(--bg-card); padding: 20px; border-radius: 16px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: background-color 0.3s; border: 1px solid var(--border); }
 
-        /* 하단 네비게이션 (설정 아이콘 추가) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); height: 65px; z-index: 1000; transition: background-color 0.3s; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; cursor: pointer; color: #8e8e93; }
+        /* 하단 네비게이션 */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); height: 70px; z-index: 1000; transition: background-color 0.3s; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; height: 100%; cursor: pointer; color: #8e8e93; }
         .nav-item svg { stroke: var(--icon-stroke); transition: stroke 0.2s; }
         .nav-item.active svg { stroke: var(--icon-active); }
 
-        /* 다크모드 토글 스위치 UI */
-        .setting-item { background: var(--bg-card); padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; margin-top: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background-color 0.3s; }
-        .toggle-switch { position: relative; width: 50px; height: 30px; }
+        /* 다크모드 설정 아이템 */
+        .setting-item { background: var(--bg-card); padding: 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 17px; font-weight: 600; margin-top: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: background-color 0.3s; border: 1px solid var(--border); }
+        .toggle-switch { position: relative; width: 54px; height: 32px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 30px; }
-        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d1d1d6; transition: .3s; border-radius: 32px; }
+        .slider:before { position: absolute; content: ""; height: 28px; width: 28px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: #34c759; }
-        input:checked + .slider:before { transform: translateX(20px); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        /* 모달 UI */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; }
-        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); padding: 20px; border-radius: 16px; width: 80%; max-width: 320px; transition: background-color 0.3s; }
-        .modal-content input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 16px; background: transparent; color: var(--text-main); }
-        .modal-btn { width: 100%; padding: 14px; background: var(--text-main); color: var(--bg-main); border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 20px;}
+        /* 모달 UI (입력창 여백 및 크기 개선) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(2px); }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); padding: 28px 24px; border-radius: 20px; width: 85%; max-width: 340px; transition: background-color 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .modal-content input[type="text"] { width: 100%; padding: 16px; margin-top: 12px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 12px; box-sizing: border-box; font-size: 17px; background: var(--cal-cell); color: var(--text-main); outline: none; }
+        .modal-content input[type="text"]:focus { border-color: #007aff; }
+        .modal-btn { width: 100%; padding: 16px; background: #007aff; color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; margin-top: 24px; }
         
-        .day-picker { display: flex; justify-content: space-between; margin-top: 10px; }
-        .day-btn { width: 36px; height: 36px; border-radius: 18px; background: var(--cal-cell); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
-        .day-btn.active { background: #007aff; color: white; }
+        .day-picker { display: flex; justify-content: space-between; margin-top: 12px; margin-bottom: 8px; }
+        .day-btn { width: 40px; height: 40px; border-radius: 20px; background: var(--cal-cell); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: 0.2s; border: 1px solid var(--border); }
+        .day-btn.active { background: #007aff; color: white; border-color: #007aff; }
 
-        .time-picker-container { display: flex; gap: 10px; margin-top: 10px; }
-        .time-box { flex: 1; display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; background: var(--cal-cell); }
-        .time-box select { flex: 1; border: none; background: transparent; font-size: 18px; padding: 12px 0; outline: none; appearance: none; text-align: center; font-weight: bold; color: #007aff;}
+        .time-picker-container { display: flex; gap: 12px; margin-top: 12px; }
+        .time-box { flex: 1; display: flex; align-items: center; border: 1px solid var(--border); border-radius: 12px; padding: 6px 14px; background: var(--cal-cell); }
+        .time-box select { flex: 1; border: none; background: transparent; font-size: 20px; padding: 12px 0; outline: none; appearance: none; text-align: center; font-weight: 700; color: #007aff; }
     </style>
 </head>
 <body>
 
-    <!-- 1. 메인 뷰 (과목 목록) -->
+    <!-- 메인 뷰 -->
     <div id="main-view" class="view active" style="padding-top:0;">
         <div class="header">
             <span class="header-title">과목 목록</span>
-            <button onclick="openModal('register')" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-main);">➕</button>
+            <button onclick="openModal('register')" style="background:none; border:none; font-size:26px; cursor:pointer; color:var(--text-main);">➕</button>
         </div>
         
         <div class="date-navigator">
@@ -125,9 +126,9 @@
         <div id="task-container"></div>
     </div>
 
-    <!-- 2. 캘린더 뷰 -->
+    <!-- 캘린더 뷰 -->
     <div id="calendar-view" class="view">
-        <div class="header" style="padding: 20px 0 0 0;"><span class="header-title">학습 기록</span></div>
+        <div class="header" style="padding: 24px 0 12px 0;"><span class="header-title">학습 기록</span></div>
         <div class="cal-wrapper" id="cal-wrapper">
             <div class="cal-header">
                 <button onclick="changeMonth(-1)">◀</button>
@@ -146,14 +147,14 @@
             <div id="cal-grid" class="cal-grid"></div>
         </div>
         <div id="day-detail" class="detail-card" style="display: none;">
-            <h3 id="detail-date" style="margin-top:0;">상세 기록</h3>
+            <h3 id="detail-date" style="margin-top:0; font-size:18px;">상세 기록</h3>
             <ul id="detail-list" style="padding-left: 20px;"></ul>
         </div>
     </div>
 
-    <!-- 3. 설정 뷰 (다크모드 포함) -->
+    <!-- 설정 뷰 -->
     <div id="settings-view" class="view">
-        <div class="header" style="padding: 20px 0 0 0;"><span class="header-title">설정</span></div>
+        <div class="header" style="padding: 24px 0 12px 0;"><span class="header-title">설정</span></div>
         <div class="setting-item">
             <span>다크 모드</span>
             <label class="toggle-switch">
@@ -163,29 +164,27 @@
         </div>
     </div>
 
-    <!-- 하단 네비게이션 (홈, 캘린더, 설정) -->
+    <!-- 하단 네비게이션 -->
     <div class="bottom-nav">
-        <!-- 홈 -->
         <div class="nav-item active" id="nav-main" onclick="switchTab('main')">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
         </div>
-        <!-- 캘린더 -->
         <div class="nav-item" id="nav-calendar" onclick="switchTab('calendar')">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
         </div>
-        <!-- 설정 (톱니바퀴) -->
         <div class="nav-item" id="nav-settings" onclick="switchTab('settings')">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </div>
     </div>
 
-    <!-- 등록/수정 모달창 -->
+    <!-- 모달창 -->
     <div id="form-modal" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 id="modal-title" style="margin-top: 0; text-align: center;">과목 등록</h3>
+            <h3 id="modal-title" style="margin-top: 0; font-size:20px; text-align: center;">과목 등록</h3>
+            
             <input type="text" id="subject-input" placeholder="과목명 (예: 알고리즘)">
             
-            <div style="font-size: 14px; color: var(--text-sub); margin-top: 15px; text-align: center;">반복 요일 선택</div>
+            <div style="font-size: 15px; font-weight:600; color: var(--text-sub); margin-top: 16px; text-align: center;">반복 요일 선택</div>
             <div class="day-picker">
                 <div class="day-btn" data-day="0" onclick="toggleDay(0)">일</div>
                 <div class="day-btn" data-day="1" onclick="toggleDay(1)">월</div>
@@ -196,10 +195,10 @@
                 <div class="day-btn" data-day="6" onclick="toggleDay(6)">토</div>
             </div>
 
-            <div style="font-size: 14px; color: var(--text-sub); margin-top: 20px; text-align: center;">하루 목표 시간</div>
+            <div style="font-size: 15px; font-weight:600; color: var(--text-sub); margin-top: 24px; text-align: center;">하루 목표 시간</div>
             <div class="time-picker-container">
-                <div class="time-box"><select id="target-hours"></select><span style="font-size:14px; color:var(--text-main);">시간</span></div>
-                <div class="time-box"><select id="target-minutes"></select><span style="font-size:14px; color:var(--text-main);">분</span></div>
+                <div class="time-box"><select id="target-hours"></select><span style="font-size:15px; color:var(--text-main);">시간</span></div>
+                <div class="time-box"><select id="target-minutes"></select><span style="font-size:15px; color:var(--text-main);">분</span></div>
             </div>
 
             <button id="modal-submit-btn" class="modal-btn">추가하기</button>
@@ -214,12 +213,11 @@
         let activeTimerId = null; 
         let timerInterval = null;
         let detailCache = {};
-        
         let viewingDate = new Date();
         let selectedDays = []; 
-        let monthlyData = {}; // 캘린더 캐싱용
+        let monthlyData = {};
 
-        // --- 다크 모드 제어 로직 ---
+        // 테마 설정
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
@@ -239,16 +237,13 @@
         }
         initTheme();
 
-        // 🚀 Pre-fetching (프리패치) 기능: 서버에서 캘린더 데이터를 백그라운드로 미리 받아옵니다.
         async function prefetchHeatmapData() {
             try {
                 const res = await fetch('/api/heatmap/');
                 const data = await res.json();
                 monthlyData = {};
                 data.forEach(d => { monthlyData[d.date] = d; });
-            } catch (error) {
-                console.error("데이터 사전 로딩 실패", error);
-            }
+            } catch (error) {}
         }
 
         function toLocalISOString(date) {
@@ -273,7 +268,6 @@
             const idx = selectedDays.indexOf(dayIdx);
             if (idx > -1) selectedDays.splice(idx, 1);
             else selectedDays.push(dayIdx);
-            
             document.querySelectorAll('.day-btn').forEach(btn => {
                 if(selectedDays.includes(parseInt(btn.dataset.day))) btn.classList.add('active');
                 else btn.classList.remove('active');
@@ -316,8 +310,8 @@
                 }, {passive: true});
                 el.addEventListener('touchend', e => {
                     let deltaX = e.changedTouches[0].screenX - startX;
-                    el.style.transition = 'transform 0.3s';
-                    if (deltaX < -60) el.style.transform = `translateX(-140px)`;
+                    el.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                    if (deltaX < -60) el.style.transform = `translateX(-150px)`;
                     else el.style.transform = `translateX(0px)`;
                 }, {passive: true});
             });
@@ -328,7 +322,7 @@
             container.innerHTML = '';
             
             if(tasks.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 40px; color:var(--text-sub);">이 날짜에 계획된 과목이 없습니다.</div>';
+                container.innerHTML = '<div style="text-align:center; padding: 40px; font-weight:600; color:var(--text-sub);">이 날짜에 계획된 과목이 없습니다.</div>';
                 return;
             }
 
@@ -338,14 +332,14 @@
                 if (task.target_minutes > 0) {
                     const h = Math.floor(task.target_minutes / 60);
                     const m = task.target_minutes % 60;
-                    targetText = `<div style="font-size:12px; color:var(--text-sub); margin-top:2px;">목표: ${h>0?h+'시간 ':''}${m}분</div>`;
+                    targetText = `<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:4px;">목표: ${h>0?h+'시간 ':''}${m}분</div>`;
                 }
 
                 container.innerHTML += `
                     <div class="task-wrapper">
                         <div class="swipe-actions">
                             <button class="swipe-btn swipe-edit" onclick="openModal('edit', '${task.uuid}')">수정</button>
-                            <button class="swipe-btn swipe-delete" onclick="confirmDelete('${task.uuid}')">🗑️</button>
+                            <button class="swipe-btn swipe-delete" onclick="confirmDelete('${task.uuid}')">삭제</button>
                         </div>
                         <div class="task-item" id="task-${task.uuid}">
                             <div class="task-info">
@@ -372,42 +366,36 @@
             
             if (mode === 'register') {
                 document.getElementById('modal-title').textContent = '과목 등록';
-                submitBtn.textContent = '추가하기';
-                submitBtn.onclick = submitForm;
                 document.getElementById('subject-input').value = '';
                 document.getElementById('target-hours').value = '0';
                 document.getElementById('target-minutes').value = '0';
                 selectedDays = [viewingDate.getDay()];
+                submitBtn.onclick = () => submitForm(false);
             } else if (mode === 'edit') {
                 const task = tasks.find(t => t.uuid === uuid);
                 document.getElementById('modal-title').textContent = '과목 수정';
-                submitBtn.textContent = '수정완료';
-                submitBtn.onclick = submitForm;
                 document.getElementById('edit-uuid').value = uuid;
                 document.getElementById('edit-type').value = task.type;
                 document.getElementById('edit-id').value = task.id;
                 document.getElementById('subject-input').value = task.subject;
                 document.getElementById('target-hours').value = Math.floor(task.target_minutes / 60);
                 document.getElementById('target-minutes').value = task.target_minutes % 60;
-                
                 selectedDays = task.repeat_days ? task.repeat_days.split(',').map(Number) : [];
                 document.getElementById(`task-${uuid}`).style.transform = 'translateX(0px)';
+                submitBtn.onclick = () => submitForm(true);
             }
             
             document.querySelectorAll('.day-btn').forEach(btn => {
                 if(selectedDays.includes(parseInt(btn.dataset.day))) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
-
             modal.style.display = 'block';
         }
 
         function closeModal(e) { document.getElementById('form-modal').style.display = 'none'; }
 
-        async function submitForm() {
-            const btn = document.getElementById('modal-submit-btn');
-            const isEdit = btn.textContent === '수정완료';
-            
+        // 🚀 Optimistic UI: 속도를 0초로 만드는 마법의 추가/수정 로직
+        function submitForm(isEdit) {
             const subject = document.getElementById('subject-input').value;
             const h = parseInt(document.getElementById('target-hours').value);
             const m = parseInt(document.getElementById('target-minutes').value);
@@ -417,39 +405,56 @@
             if (!subject) return alert("과목명을 입력해주세요.");
             if (selectedDays.length === 0) return alert("최소 하루 이상의 요일을 선택해주세요.");
 
-            btn.disabled = true;
-            btn.textContent = '저장 중...';
+            // 1. 유저가 기다리지 않도록 모달 즉시 닫기
+            closeModal();
 
+            // 2. 화면에 임시로 그리기 (Optimistic Update)
             if (!isEdit) {
-                const res = await fetch('/api/routines/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subject, target_minutes, repeat_days })
+                // 추가할 때 가상의 데이터를 밀어넣어 즉시 렌더링
+                const tempUuid = 'temp_' + Date.now();
+                tasks.push({
+                    uuid: tempUuid, type: 'routine', subject: subject,
+                    target_minutes: target_minutes, seconds: 0, is_completed: false, repeat_days: repeat_days
                 });
-                if (res.ok) { closeModal(); loadTasksForDate(); prefetchHeatmapData(); }
+            } else {
+                // 수정할 때 기존 데이터의 값만 즉시 변경
+                const uuid = document.getElementById('edit-uuid').value;
+                const task = tasks.find(t => t.uuid === uuid);
+                if (task) { task.subject = subject; task.target_minutes = target_minutes; task.repeat_days = repeat_days; }
+            }
+            renderTasks(); // 수정된/추가된 데이터를 0초 만에 화면에 그림
+
+            // 3. 백그라운드 서버 통신
+            const payload = { subject, target_minutes, repeat_days };
+            if (!isEdit) {
+                fetch('/api/routines/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                    .then(() => { loadTasksForDate(); prefetchHeatmapData(); }); // 서버에 저장되면 진짜 ID값을 불러옴
             } else {
                 const type = document.getElementById('edit-type').value;
                 const id = document.getElementById('edit-id').value;
-                const res = await fetch(`/api/tasks/${type}/${id}/edit`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subject, target_minutes, repeat_days })
-                });
-                if (res.ok) { closeModal(); loadTasksForDate(); prefetchHeatmapData(); }
+                fetch(`/api/tasks/${type}/${id}/edit`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                    .then(() => { loadTasksForDate(); prefetchHeatmapData(); });
             }
-            btn.disabled = false;
         }
 
-        async function confirmDelete(uuid) {
-            const task = tasks.find(t => t.uuid === uuid);
+        // 🚀 Optimistic UI: 속도를 0초로 만드는 마법의 삭제 로직
+        function confirmDelete(uuid) {
             if (confirm("정말로 이 과목을 삭제 하겠습니까?")) {
-                const res = await fetch(`/api/tasks/${task.type}/${task.id}`, { method: 'DELETE' });
-                if (res.ok) { loadTasksForDate(); prefetchHeatmapData(); }
+                const task = tasks.find(t => t.uuid === uuid);
+                
+                // 1. 서버 응답을 기다리지 않고 아이폰 화면(배열)에서 즉시 삭제
+                tasks = tasks.filter(t => t.uuid !== uuid);
+                renderTasks(); 
+
+                // 2. 백그라운드 서버 통신
+                fetch(`/api/tasks/${task.type}/${task.id}`, { method: 'DELETE' })
+                    .then(() => { prefetchHeatmapData(); });
             } else {
                 document.getElementById(`task-${uuid}`).style.transform = 'translateX(0px)';
             }
         }
 
+        // 타이머 및 기타 로직
         function toggleTimer(uuid) {
             const task = tasks.find(t => t.uuid === uuid);
             document.querySelectorAll('.task-item').forEach(el => el.style.transform = 'translateX(0px)');
@@ -482,29 +487,18 @@
 
         function toggleComplete(uuid, isChecked) {
             tasks.find(t => t.uuid === uuid).is_completed = isChecked;
-            syncTaskToServer(uuid);
+            syncTaskToServer(uuid); // 이것도 Optimistic하게 동작
         }
 
         async function syncTaskToServer(uuid) {
             const task = tasks.find(t => t.uuid === uuid);
             let duration_minutes = task.seconds > 0 ? Math.max(1, Math.ceil(task.seconds / 60)) : 0;
-            
             const payload = {
-                date: toLocalISOString(viewingDate),
-                routine_id: task.routine_id,
-                subject: task.subject,
-                target_minutes: task.target_minutes,
-                duration_minutes: duration_minutes,
-                is_completed: task.is_completed
+                date: toLocalISOString(viewingDate), routine_id: task.routine_id, subject: task.subject,
+                target_minutes: task.target_minutes, duration_minutes: duration_minutes, is_completed: task.is_completed
             };
-
-            await fetch(`/api/records/sync`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            // 백그라운드 캘린더 업데이트
-            prefetchHeatmapData();
+            fetch(`/api/records/sync`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                .then(() => prefetchHeatmapData());
         }
 
         function switchTab(tabName) {
@@ -512,11 +506,7 @@
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`${tabName}-view`).classList.add('active');
             document.getElementById(`nav-${tabName}`).classList.add('active');
-            
-            // 🚀 프리패치 덕분에 서버를 기다릴 필요 없이 즉시 화면 렌더링
-            if (tabName === 'calendar') { 
-                renderCalendar(); 
-            }
+            if (tabName === 'calendar') { renderCalendar(); }
         }
 
         let currentYear = new Date().getFullYear();
@@ -535,29 +525,27 @@
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const isToday = (today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === d);
-                // 미리 로딩된 monthlyData 사용
                 const dayData = monthlyData[dateStr] || { value: 0, target: 0 };
                 const totalMinutes = dayData.value;
                 const targetMinutes = dayData.target;
                 
-                let bgColorClass = ''; let textClass = '';
+                let bgColorClass = '';
                 if (targetMinutes > 0) {
-                    if (totalMinutes >= targetMinutes) { bgColorClass = 'success'; textClass = 'success'; } 
-                    else if (totalMinutes > 0) { bgColorClass = 'fail'; textClass = 'fail'; }
+                    if (totalMinutes >= targetMinutes) bgColorClass = 'success';
+                    else if (totalMinutes > 0) bgColorClass = 'fail';
                 } else if (totalMinutes > 0) {
-                    bgColorClass = 'success'; textClass = 'success';
+                    bgColorClass = 'success';
                 }
 
                 let recordBadge = '';
                 if (totalMinutes > 0) {
                     const h = Math.floor(totalMinutes / 60); const m = totalMinutes % 60;
                     const timeText = h > 0 ? `${h}h ${m}m` : `${m}m`;
-                    recordBadge = `<div class="cal-record ${textClass}">${timeText}</div>`;
+                    recordBadge = `<div class="cal-record ${bgColorClass}">${timeText}</div>`;
                 }
 
-                // 다크모드 대응을 위해 테두리 색상을 var(--text-main)으로 변경
                 grid.innerHTML += `
-                    <div class="cal-cell ${bgColorClass}" style="${isToday ? 'border: 2px solid var(--text-main);' : ''}" onclick="showDetail('${dateStr}')">
+                    <div class="cal-cell ${bgColorClass}" style="${isToday ? 'border: 2px solid var(--icon-stroke);' : ''}" onclick="showDetail('${dateStr}')">
                         <span class="cal-date-num">${d}</span>
                         ${recordBadge}
                     </div>
@@ -577,7 +565,7 @@
             document.getElementById('day-detail').style.display = 'block';
             const list = document.getElementById('detail-list');
             if (detailCache[dateStr]) drawDetailList(detailCache[dateStr]);
-            else list.innerHTML = '<li style="color:var(--text-sub);">기록을 불러오는 중...</li>';
+            else list.innerHTML = '<li style="color:var(--text-sub); font-weight:600;">기록을 불러오는 중...</li>';
             
             fetch(`/api/records/date/${dateStr}`)
                 .then(res => res.json())
@@ -587,20 +575,19 @@
         function drawDetailList(data) {
             const list = document.getElementById('detail-list');
             list.innerHTML = '';
-            if(data.length === 0) list.innerHTML = '<li style="color:var(--text-sub);">학습 기록이 없습니다.</li>';
+            if(data.length === 0) list.innerHTML = '<li style="color:var(--text-sub); font-weight:600;">학습 기록이 없습니다.</li>';
             else {
                 data.forEach(d => {
-                    const check = d.is_completed ? "<span style='color:#34c759; font-weight:bold; margin-right:5px;'>달성</span>" : "<span style='margin-right:5px;'>❌</span>";
+                    const check = d.is_completed ? "<span style='color:#34c759; font-weight:800; margin-right:6px;'>달성</span>" : "<span style='margin-right:6px;'>❌</span>";
                     const targetInfo = d.target_minutes > 0 ? ` / 목표 ${d.target_minutes}분` : '';
-                    list.innerHTML += `<li style="margin-bottom: 8px; display:flex; align-items:center;">${check} <span style="color:var(--text-main);">${d.subject}</span> - <b style="color:var(--text-main); margin:0 5px;">${d.duration_minutes}분</b><span style="font-size:12px;color:var(--text-sub);">${targetInfo}</span></li>`;
+                    list.innerHTML += `<li style="margin-bottom: 10px; display:flex; align-items:center; font-weight:600;">${check} <span style="color:var(--text-main);">${d.subject}</span> - <b style="color:var(--text-main); margin:0 6px;">${d.duration_minutes}분</b><span style="font-size:13px;color:var(--text-sub);">${targetInfo}</span></li>`;
                 });
             }
         }
 
-        // 앱 켜질 때 초기 실행 3종 세트
         updateDateUI();
         loadTasksForDate();
-        prefetchHeatmapData(); // 백그라운드 캘린더 사전 로딩 시작!
+        prefetchHeatmapData(); 
 
     </script>
 </body>
