@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>나만의 플래너</title>
     <link rel="manifest" href="manifest.json">
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.3/dist/cal-heatmap.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.3/dist/cal-heatmap.css">
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; background-color: #f2f2f7; color: #000; padding-bottom: 70px; }
-        .header { padding: 20px; font-size: 24px; font-weight: bold; background: white; margin-bottom: 10px; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background-color: #f2f2f7; color: #000; padding-bottom: 90px; user-select: none; }
+        .header { padding: 20px; font-size: 24px; font-weight: bold; background: white; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* 탭 화면 제어 */
         .view { display: none; padding: 10px 20px; }
         .view.active { display: block; }
 
@@ -20,91 +16,109 @@
         .task-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .task-info { display: flex; flex-direction: column; }
         .task-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-        .task-time { font-size: 14px; color: #666; }
+        .task-time { font-size: 14px; color: #666; font-variant-numeric: tabular-nums; }
         .task-actions { display: flex; align-items: center; gap: 15px; }
-        .play-btn { background: #007aff; color: white; border: none; width: 40px; height: 40px; border-radius: 20px; font-size: 16px; cursor: pointer; }
+        .play-btn { background: #007aff; color: white; border: none; width: 44px; height: 44px; border-radius: 22px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
         .stop-btn { background: #ff3b30; }
         input[type="checkbox"] { width: 24px; height: 24px; accent-color: #34c759; }
 
-        /* 하단 네비게이션 바 */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 14px; color: #8e8e93; cursor: pointer; }
-        .nav-item.active { color: #007aff; font-weight: bold; }
-
-        /* 플로팅 등록 버튼 (+) */
-        .fab { position: fixed; bottom: 80px; right: 20px; background: #007aff; color: white; width: 56px; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; border: none; }
-
-        /* 등록 팝업 (모달) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; }
-        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 12px; width: 80%; max-width: 300px; }
-        .modal-content input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .modal-btn { width: 100%; padding: 12px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 16px; }
-
-        /* 캘린더 상세 뷰 */
+        /* 커스텀 캘린더 (달력) UI */
+        .cal-wrapper { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        .cal-header button { background: none; border: none; font-size: 20px; color: #007aff; cursor: pointer; padding: 10px; }
+        .cal-day-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 8px; }
+        .cal-day-name { text-align: center; font-size: 12px; font-weight: bold; color: #8e8e93; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-cell { aspect-ratio: 1/1; background: #f9f9f9; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; }
+        .cal-cell.empty { background: transparent; box-shadow: none; cursor: default; }
+        .cal-cell.today { border: 2px solid #007aff; background: #eef7ff; }
+        .cal-date-num { position: absolute; top: 4px; right: 6px; font-size: 13px; font-weight: bold; color: #333; }
+        .cal-record { font-size: 11px; font-weight: bold; color: #34c759; background: rgba(52, 199, 89, 0.15); padding: 2px 6px; border-radius: 8px; }
+        
         .detail-card { background: white; padding: 15px; border-radius: 12px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* 하단 네비게이션 바 (가운데 둥근 버튼 포함) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; align-items: center; border-top: 1px solid #ddd; padding-bottom: env(safe-area-inset-bottom); height: 65px; z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; font-size: 26px; cursor: pointer; color: #8e8e93; }
+        .nav-item-center { flex: 1; display: flex; justify-content: center; position: relative; z-index: 1001; }
+        .center-round-btn { width: 66px; height: 66px; background: #007aff; border-radius: 33px; display: flex; justify-content: center; align-items: center; font-size: 30px; color: white; position: absolute; top: -25px; box-shadow: 0 4px 12px rgba(0,122,255,0.4); cursor: pointer; transition: transform 0.2s; }
+        .center-round-btn:active { transform: scale(0.95); }
+
+        /* 모달창 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; }
+        .modal-content { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 16px; width: 80%; max-width: 320px; }
+        .modal-content input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .modal-btn { width: 100%; padding: 14px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- 화면 1: 메인 투두리스트 -->
+    <!-- 화면 1: 메인 뷰 -->
     <div id="main-view" class="view active">
-        <div class="header">📚 오늘의 목표</div>
-        <div id="task-container">
-            <!-- 자바스크립트로 과목들이 여기에 추가됩니다 -->
+        <div class="header">
+            <span>📚 오늘의 목표</span>
+            <button onclick="openModal()" style="background:none; border:none; font-size:24px; cursor:pointer;">➕</button>
         </div>
-        <button class="fab" onclick="openModal()">+</button>
+        <div id="task-container"></div>
     </div>
 
-    <!-- 화면 2: 캘린더 잔디밭 -->
+    <!-- 화면 2: 캘린더 뷰 (스와이프 지원) -->
     <div id="calendar-view" class="view">
-        <div class="header">🌱 나의 성장 기록</div>
-        <div style="background: white; padding: 20px; border-radius: 12px; overflow-x: auto;">
-            <div id="cal-heatmap"></div>
+        <div class="header" style="margin-bottom: 20px;"><span>🌱 나의 성장 기록</span></div>
+        
+        <div class="cal-wrapper" id="cal-wrapper">
+            <div class="cal-header">
+                <button onclick="changeMonth(-1)">◀</button>
+                <span id="month-title"></span>
+                <button onclick="changeMonth(1)">▶</button>
+            </div>
+            <div class="cal-day-row">
+                <div class="cal-day-name" style="color:#ff3b30;">일</div>
+                <div class="cal-day-name">월</div>
+                <div class="cal-day-name">화</div>
+                <div class="cal-day-name">수</div>
+                <div class="cal-day-name">목</div>
+                <div class="cal-day-name">금</div>
+                <div class="cal-day-name" style="color:#007aff;">토</div>
+            </div>
+            <div id="cal-grid" class="cal-grid"></div>
         </div>
         
-        <!-- 날짜 클릭 시 나오는 상세 화면 -->
         <div id="day-detail" class="detail-card" style="display: none;">
             <h3 id="detail-date" style="margin-top:0;">상세 기록</h3>
-            <ul id="detail-list"></ul>
+            <ul id="detail-list" style="padding-left: 20px;"></ul>
         </div>
     </div>
 
     <!-- 하단 네비게이션 바 -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('main')">메인 홈</div>
-        <div class="nav-item" onclick="switchTab('calendar')">기록 보기</div>
+        <!-- 좌측 빈 공간 (균형 유지) -->
+        <div class="nav-item"></div>
+        
+        <!-- 중앙 둥근 홈 버튼 -->
+        <div class="nav-item-center" onclick="switchTab('main')">
+            <div class="center-round-btn">🏠</div>
+        </div>
+        
+        <!-- 우측 캘린더 버튼 -->
+        <div class="nav-item" onclick="switchTab('calendar')">📅</div>
     </div>
 
-    <!-- 과목 등록 모달창 -->
+    <!-- 등록 모달 -->
     <div id="register-modal" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 style="margin-top: 0;">새로운 과목 등록</h3>
+            <h3 style="margin-top: 0; text-align: center;">새로운 과목 등록</h3>
             <input type="text" id="subject-input" placeholder="어떤 공부를 할 건가요?">
             <button class="modal-btn" onclick="saveSubject()">등록하기</button>
         </div>
     </div>
 
     <script>
+        // === 1. 상태 및 타이머 로직 ===
         let tasks = [];
         let activeTimerId = null;
         let timerInterval = null;
 
-        // 탭 전환 로직
-        function switchTab(tabName) {
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(`${tabName}-view`).classList.add('active');
-            event.currentTarget.classList.add('active');
-
-            if (tabName === 'calendar') renderCalendar();
-        }
-
-        // 모달창 제어
-        function openModal() { document.getElementById('register-modal').style.display = 'block'; }
-        function closeModal(e) { document.getElementById('register-modal').style.display = 'none'; }
-
-        // 시간 포맷 (분 -> HH:MM:SS)
         function formatTime(totalSeconds) {
             const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
             const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
@@ -112,27 +126,21 @@
             return `${h}:${m}:${s}`;
         }
 
-        // 서버에서 오늘 목록 불러와서 화면에 그리기
         async function loadTodayTasks() {
             const res = await fetch('/api/records/today');
             tasks = await res.json();
-            
-            // 데이터베이스에는 '분' 단위로 저장되어 있으므로 초 단위(x60)로 화면에 표시용 변환
             tasks.forEach(t => t.seconds = t.duration_minutes * 60);
             renderTasks();
         }
 
-        // 과목 등록하기
         async function saveSubject() {
             const subject = document.getElementById('subject-input').value;
             if (!subject) return;
-
             const res = await fetch('/api/records/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subject })
             });
-            
             if (res.ok) {
                 document.getElementById('subject-input').value = '';
                 closeModal();
@@ -140,52 +148,57 @@
             }
         }
 
-        // 타이머 제어
         function toggleTimer(id) {
             const task = tasks.find(t => t.id === id);
             
-            // 다른 타이머가 돌고 있다면 멈추고 서버에 저장
+            // 다른 타이머가 켜져있다면 끄고 저장
             if (activeTimerId && activeTimerId !== id) {
                 clearInterval(timerInterval);
                 updateTaskToServer(activeTimerId);
                 const prevBtn = document.getElementById(`btn-${activeTimerId}`);
-                if(prevBtn) { prevBtn.textContent = '▶'; prevBtn.classList.remove('stop-btn'); }
+                if(prevBtn) { prevBtn.innerHTML = '▶'; prevBtn.classList.remove('stop-btn'); }
             }
 
             const btn = document.getElementById(`btn-${id}`);
             
-            // 현재 타이머 정지
             if (activeTimerId === id) {
+                // 정지
                 clearInterval(timerInterval);
                 activeTimerId = null;
-                btn.textContent = '▶';
+                btn.innerHTML = '▶';
                 btn.classList.remove('stop-btn');
                 updateTaskToServer(id);
-            } 
-            // 새로운 타이머 시작
-            else {
+            } else {
+                // 시작
                 activeTimerId = id;
-                btn.textContent = '■';
+                btn.innerHTML = '■';
                 btn.classList.add('stop-btn');
                 
                 timerInterval = setInterval(() => {
                     task.seconds++;
                     document.getElementById(`time-${id}`).textContent = formatTime(task.seconds);
+                    
+                    // 핵심: 10초마다 서버에 자동 임시 저장 (데이터 증발 방지)
+                    if (task.seconds % 10 === 0) {
+                        updateTaskToServer(id);
+                    }
                 }, 1000);
             }
         }
 
-        // 체크박스 클릭 시 달성 업데이트
         function toggleComplete(id, isChecked) {
             const task = tasks.find(t => t.id === id);
             task.is_completed = isChecked;
             updateTaskToServer(id);
         }
 
-        // 변경된 시간/상태를 서버에 저장 (PUT)
         async function updateTaskToServer(id) {
             const task = tasks.find(t => t.id === id);
-            const duration_minutes = Math.floor(task.seconds / 60);
+            // 핵심: 1초라도 했다면 1분으로 올림 처리 (단 0초는 제외)
+            let duration_minutes = 0;
+            if (task.seconds > 0) {
+                duration_minutes = Math.max(1, Math.ceil(task.seconds / 60));
+            }
             
             await fetch(`/api/records/${id}`, {
                 method: 'PUT',
@@ -194,14 +207,12 @@
             });
         }
 
-        // 메인 화면 그리기
         function renderTasks() {
             const container = document.getElementById('task-container');
             container.innerHTML = '';
-            
             tasks.forEach(task => {
                 const isRunning = activeTimerId === task.id;
-                const html = `
+                container.innerHTML += `
                     <div class="task-item">
                         <div class="task-info">
                             <span class="task-title">${task.subject}</span>
@@ -215,51 +226,115 @@
                         </div>
                     </div>
                 `;
-                container.innerHTML += html;
             });
         }
 
-        // 캘린더 (잔디) 렌더링 및 클릭 이벤트
-        let cal;
+        // === 2. 화면 전환 (탭) 제어 ===
+        async function switchTab(tabName) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(`${tabName}-view`).classList.add('active');
+            
+            if (tabName === 'calendar') {
+                await loadHeatmapData(); // 캘린더 진입 시 최신 시간 데이터 불러오기
+                renderCalendar();
+            }
+        }
+
+        // 모달 제어
+        function openModal() { document.getElementById('register-modal').style.display = 'block'; }
+        function closeModal(e) { document.getElementById('register-modal').style.display = 'none'; }
+
+        // === 3. 스와이프 가능한 달력 로직 ===
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth(); // 0 ~ 11
+        let monthlyData = {};
+
+        async function loadHeatmapData() {
+            const res = await fetch('/api/heatmap/');
+            const data = await res.json();
+            monthlyData = {};
+            data.forEach(d => { monthlyData[d.date] = d.value; });
+        }
+
         function renderCalendar() {
-            if (cal) return; // 이미 그렸으면 무시
-            cal = new CalHeatmap();
-            cal.paint({
-                itemSelector: '#cal-heatmap',
-                domain: { type: 'month' },
-                subDomain: { type: 'day' },
-                date: { start: new Date(new Date().setMonth(new Date().getMonth() - 2)) }, // 3개월
-                data: { source: '/api/heatmap/', type: 'json', x: 'date', y: 'value' },
-                theme: 'light',
-            });
+            document.getElementById('month-title').textContent = `${currentYear}년 ${currentMonth + 1}월`;
+            const grid = document.getElementById('cal-grid');
+            grid.innerHTML = '';
 
-            // v4 클릭 이벤트: 잔디를 클릭하면 해당 날짜의 기록을 가져옴
-            cal.on('click', async (event, timestamp, value) => {
-                const clickedDate = new Date(timestamp);
-                const localDateStr = clickedDate.getFullYear() + '-' + 
-                                     String(clickedDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                                     String(clickedDate.getDate()).padStart(2, '0');
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 일(0) ~ 토(6)
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+
+            // 1일 앞의 빈 공간 채우기
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="cal-cell empty"></div>`;
+            }
+
+            // 날짜 채우기
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const isToday = (today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === d);
                 
-                document.getElementById('detail-date').textContent = `${localDateStr} 기록`;
-                document.getElementById('day-detail').style.display = 'block';
-                
-                const res = await fetch(`/api/records/date/${localDateStr}`);
-                const data = await res.json();
-                
-                const list = document.getElementById('detail-list');
-                list.innerHTML = '';
-                if(data.length === 0) {
-                    list.innerHTML = '<li>학습 기록이 없습니다.</li>';
-                } else {
-                    data.forEach(d => {
-                        const check = d.is_completed ? "✅" : "❌";
-                        list.innerHTML += `<li>${check} ${d.subject} - ${d.duration_minutes}분</li>`;
-                    });
+                const totalMinutes = monthlyData[dateStr] || 0;
+                let recordBadge = '';
+                if (totalMinutes > 0) {
+                    const h = Math.floor(totalMinutes / 60);
+                    const m = totalMinutes % 60;
+                    const timeText = h > 0 ? `${h}h ${m}m` : `${m}m`;
+                    recordBadge = `<div class="cal-record">${timeText}</div>`;
                 }
-            });
+
+                grid.innerHTML += `
+                    <div class="cal-cell ${isToday ? 'today' : ''}" onclick="showDetail('${dateStr}')">
+                        <span class="cal-date-num">${d}</span>
+                        ${recordBadge}
+                    </div>
+                `;
+            }
         }
 
-        // 초기 실행
+        function changeMonth(step) {
+            currentMonth += step;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            else if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar();
+        }
+
+        // 스와이프 이벤트 처리
+        let startX = 0;
+        const calWrapper = document.getElementById('cal-wrapper');
+        
+        calWrapper.addEventListener('touchstart', (e) => {
+            startX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        calWrapper.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].screenX;
+            if (endX < startX - 50) changeMonth(1);  // 왼쪽으로 밀면 다음 달
+            if (endX > startX + 50) changeMonth(-1); // 오른쪽으로 밀면 이전 달
+        }, {passive: true});
+
+        // 특정 날짜 클릭 시 상세 기록
+        async function showDetail(dateStr) {
+            document.getElementById('detail-date').textContent = `${dateStr} 상세 기록`;
+            document.getElementById('day-detail').style.display = 'block';
+            
+            const res = await fetch(`/api/records/date/${dateStr}`);
+            const data = await res.json();
+            const list = document.getElementById('detail-list');
+            list.innerHTML = '';
+            
+            if(data.length === 0) {
+                list.innerHTML = '<li>학습 기록이 없습니다.</li>';
+            } else {
+                data.forEach(d => {
+                    const check = d.is_completed ? "✅" : "❌";
+                    list.innerHTML += `<li style="margin-bottom: 8px;">${check} ${d.subject} - <b style="color:#007aff;">${d.duration_minutes}분</b></li>`;
+                });
+            }
+        }
+
+        // 앱 켜질 때 초기 세팅
         loadTodayTasks();
     </script>
 </body>
