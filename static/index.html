@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>나의 플래너</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.3/dist/cal-heatmap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.3/dist/cal-heatmap.css">
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f9f9f9; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .timer { font-size: 2.5em; font-weight: bold; text-align: center; margin: 20px 0; color: #333; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
+        .btn-group { display: flex; gap: 10px; }
+        button { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
+        #startBtn { background-color: #34c759; color: white; }
+        #stopBtn { background-color: #ff3b30; color: white; }
+        #saveBtn { background-color: #007aff; color: white; width: 100%; margin-top: 10px; }
+        button:disabled { background-color: #d1d1d6; }
+    </style>
+</head>
+<body>
+    <h2>📚 오늘의 학습</h2>
+    <div class="card">
+        <input type="text" id="subject" placeholder="과목명 (예: 백준 알고리즘)">
+        <label><input type="checkbox" id="completedCheckbox"> 타이머 없이 바로 완료 처리</label>
+        
+        <div class="timer" id="timeDisplay">00:00:00</div>
+        
+        <div class="btn-group">
+            <button id="startBtn">▶ 시작</button>
+            <button id="stopBtn" disabled>■ 정지</button>
+        </div>
+        <button id="saveBtn">💾 기록 저장</button>
+    </div>
+
+    <h2>🌱 나의 성장 기록</h2>
+    <div class="card" style="overflow-x: auto;">
+        <div id="cal-heatmap"></div>
+    </div>
+
+    <script>
+        // 서비스 워커 등록 (PWA 필수)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        // 타이머 로직
+        let timerInterval, seconds = 0, isRunning = false;
+        const timeDisplay = document.getElementById('timeDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        function updateDisplay() {
+            const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            timeDisplay.textContent = `${h}:${m}:${s}`;
+        }
+
+        startBtn.onclick = () => {
+            if (!isRunning) {
+                isRunning = true; startBtn.disabled = true; stopBtn.disabled = false;
+                timerInterval = setInterval(() => { seconds++; updateDisplay(); }, 1000);
+            }
+        };
+
+        stopBtn.onclick = () => {
+            isRunning = false; startBtn.disabled = false; stopBtn.disabled = true;
+            clearInterval(timerInterval);
+        };
+
+        // 데이터 저장 및 잔디 갱신
+        document.getElementById('saveBtn').onclick = async () => {
+            const subject = document.getElementById('subject').value;
+            const isCompleted = document.getElementById('completedCheckbox').checked;
+            // 최소 1분으로 기록되게 하거나 체크박스 클릭 시 1분으로 세팅
+            let durationMinutes = Math.floor(seconds / 60);
+            if (isCompleted && durationMinutes === 0) durationMinutes = 1; 
+
+            if (!subject) return alert("과목명을 입력해주세요!");
+
+            const recordData = {
+                subject: subject,
+                study_date: new Date().toISOString().split('T')[0],
+                duration_minutes: durationMinutes,
+                is_completed: isCompleted
+            };
+
+            await fetch('/api/records/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(recordData)
+            });
+            
+            alert("저장되었습니다!");
+            seconds = 0; updateDisplay();
+            document.getElementById('subject').value = '';
+            document.getElementById('completedCheckbox').checked = false;
+            
+            // 저장 후 잔디 새로고침
+            location.reload(); 
+        };
+
+        // 깃허브 잔디 (Heatmap) 그리기
+        const cal = new CalHeatmap();
+        cal.paint({
+            itemSelector: '#cal-heatmap',
+            domain: { type: 'month' },
+            subDomain: { type: 'day' },
+            date: { start: new Date(new Date().setMonth(new Date().getMonth() - 2)) }, // 최근 3개월 표시
+            data: {
+                source: '/api/heatmap/',
+                type: 'json',
+                x: 'date',
+                y: 'value'
+            },
+            theme: 'light',
+        });
+    </script>
+</body>
+</html>

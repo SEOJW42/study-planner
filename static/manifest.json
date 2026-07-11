@@ -1,0 +1,15 @@
+{
+  "name": "My Planner",
+  "short_name": "Planner",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f9f9f9",
+  "theme_color": "#007aff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1066/1066468.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
