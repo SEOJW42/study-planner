@@ -12,7 +12,7 @@ load_dotenv()
 app = FastAPI()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# --- 데이터 모델 (목표 시간 추가) ---
+# --- 데이터 모델 ---
 class SubjectCreate(BaseModel):
     subject: str
     target_minutes: int
@@ -21,11 +21,13 @@ class RecordUpdate(BaseModel):
     duration_minutes: int
     is_completed: bool
 
-# DB 연결 함수
+class RecordEdit(BaseModel):
+    subject: str
+    target_minutes: int
+
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
-# DB 초기화 및 업데이트 (목표 시간 컬럼 자동 추가)
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -35,18 +37,11 @@ def init_db():
             subject VARCHAR(255),
             study_date DATE,
             duration_minutes INTEGER DEFAULT 0,
-            is_completed BOOLEAN DEFAULT FALSE
+            is_completed BOOLEAN DEFAULT FALSE,
+            target_minutes INTEGER DEFAULT 0
         )
     """)
     conn.commit()
-    
-    # 새로운 '목표 시간' 컬럼이 없다면 안전하게 추가합니다.
-    try:
-        cursor.execute("ALTER TABLE records ADD COLUMN IF NOT EXISTS target_minutes INTEGER DEFAULT 0")
-        conn.commit()
-    except Exception:
-        conn.rollback()
-
     cursor.close()
     conn.close()
 
@@ -68,7 +63,6 @@ async def create_record(record: SubjectCreate):
     conn = get_db_connection()
     cursor = conn.cursor()
     today_str = date.today().isoformat()
-    # 목표 시간도 함께 저장
     cursor.execute(
         "INSERT INTO records (subject, study_date, duration_minutes, is_completed, target_minutes) VALUES (%s, %s, 0, FALSE, %s) RETURNING id",
         (record.subject, today_str, record.target_minutes)
@@ -92,7 +86,31 @@ async def update_record(record_id: int, update_data: RecordUpdate):
     conn.close()
     return {"message": "success"}
 
-# 캘린더 데이터 조회 (총 학습 시간과 총 목표 시간 반환)
+# --- [추가] 과목명 및 목표 시간 수정 API ---
+@app.put("/api/records/{record_id}/edit")
+async def edit_record(record_id: int, edit_data: RecordEdit):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE records SET subject = %s, target_minutes = %s WHERE id = %s",
+        (edit_data.subject, edit_data.target_minutes, record_id)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "success"}
+
+# --- [추가] 기록 삭제 API ---
+@app.delete("/api/records/{record_id}")
+async def delete_record(record_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM records WHERE id = %s", (record_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "deleted"}
+
 @app.get("/api/heatmap/")
 async def get_heatmap():
     conn = get_db_connection()
@@ -101,10 +119,8 @@ async def get_heatmap():
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-    
     return [{"date": row['date'], "value": row['total'], "target": row['target']} for row in rows]
 
-# 상세 기록 조회 (목표 시간 포함)
 @app.get("/api/records/date/{query_date}")
 async def get_daily_records(query_date: str):
     conn = get_db_connection()
