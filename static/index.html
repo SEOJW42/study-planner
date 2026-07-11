@@ -7,12 +7,13 @@
     <link rel="manifest" href="manifest.json">
     <style>
         body { font-family: -apple-system, sans-serif; margin: 0; background-color: #f2f2f7; color: #000; padding-bottom: 90px; user-select: none; }
-        .header { padding: 20px; font-size: 24px; font-weight: bold; background: white; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 헤더 디자인 깔끔하게 변경 */
+        .header { padding: 20px; font-size: 22px; font-weight: 500; background: white; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: #111; }
         
         .view { display: none; padding: 10px 20px; }
         .view.active { display: block; }
 
-        /* 메인 리스트 아이템 */
         .task-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .task-info { display: flex; flex-direction: column; }
         .task-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
@@ -22,33 +23,37 @@
         .stop-btn { background: #ff3b30; }
         input[type="checkbox"] { width: 24px; height: 24px; accent-color: #34c759; }
 
-        /* 커스텀 캘린더 (달력) UI */
         .cal-wrapper { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .cal-header button { background: none; border: none; font-size: 20px; color: #007aff; cursor: pointer; padding: 10px; }
+        .cal-header button { background: none; border: none; font-size: 20px; color: #000; cursor: pointer; padding: 10px; }
         .cal-day-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 8px; }
         .cal-day-name { text-align: center; font-size: 12px; font-weight: bold; color: #8e8e93; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .cal-cell { aspect-ratio: 1/1; background: #f9f9f9; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; }
+        
+        .cal-cell { aspect-ratio: 1/1; background: #f9f9f9; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; border: 1.5px solid transparent; }
         .cal-cell.empty { background: transparent; box-shadow: none; cursor: default; }
-        .cal-cell.today { border: 2px solid #007aff; background: #eef7ff; }
+        
+        /* 목표 달성 여부에 따른 캘린더 색상 */
+        .cal-cell.success { border-color: #34c759; background: #e8f5e9; }
+        .cal-cell.fail { border-color: #ff3b30; background: #ffebee; }
+        
         .cal-date-num { position: absolute; top: 4px; right: 6px; font-size: 13px; font-weight: bold; color: #333; }
-        .cal-record { font-size: 11px; font-weight: bold; color: #34c759; background: rgba(52, 199, 89, 0.15); padding: 2px 6px; border-radius: 8px; }
+        .cal-record { font-size: 11px; font-weight: bold; color: #666; padding: 2px 6px; border-radius: 8px; }
+        .cal-record.success { color: #2e7d32; background: rgba(52, 199, 89, 0.2); }
+        .cal-record.fail { color: #c62828; background: rgba(255, 59, 48, 0.2); }
         
         .detail-card { background: white; padding: 15px; border-radius: 12px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
-        /* 하단 네비게이션 바 (가운데 둥근 버튼 포함) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; align-items: center; border-top: 1px solid #ddd; padding-bottom: env(safe-area-inset-bottom); height: 65px; z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; font-size: 26px; cursor: pointer; color: #8e8e93; }
-        .nav-item-center { flex: 1; display: flex; justify-content: center; position: relative; z-index: 1001; }
-        .center-round-btn { width: 66px; height: 66px; background: #007aff; border-radius: 33px; display: flex; justify-content: center; align-items: center; font-size: 30px; color: white; position: absolute; top: -25px; box-shadow: 0 4px 12px rgba(0,122,255,0.4); cursor: pointer; transition: transform 0.2s; }
-        .center-round-btn:active { transform: scale(0.95); }
+        /* 하단 네비게이션 (검은색 외곽선 아이콘 적용) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #ddd; padding-bottom: env(safe-area-inset-bottom); height: 65px; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; cursor: pointer; color: #8e8e93; }
+        .nav-item svg { stroke: #8e8e93; transition: stroke 0.2s; }
+        .nav-item.active svg { stroke: #000; }
 
-        /* 모달창 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; }
         .modal-content { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 16px; width: 80%; max-width: 320px; }
-        .modal-content input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .modal-btn { width: 100%; padding: 14px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .modal-btn { width: 100%; padding: 14px; background: #000; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px;}
     </style>
 </head>
 <body>
@@ -56,15 +61,15 @@
     <!-- 화면 1: 메인 뷰 -->
     <div id="main-view" class="view active">
         <div class="header">
-            <span>📚 오늘의 목표</span>
-            <button onclick="openModal()" style="background:none; border:none; font-size:24px; cursor:pointer;">➕</button>
+            <span>무계획이 계획</span>
+            <button onclick="openModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#000;">➕</button>
         </div>
         <div id="task-container"></div>
     </div>
 
-    <!-- 화면 2: 캘린더 뷰 (스와이프 지원) -->
+    <!-- 화면 2: 캘린더 뷰 -->
     <div id="calendar-view" class="view">
-        <div class="header" style="margin-bottom: 20px;"><span>🌱 나의 성장 기록</span></div>
+        <div class="header" style="margin-bottom: 20px;"><span>학습 기록</span></div>
         
         <div class="cal-wrapper" id="cal-wrapper">
             <div class="cal-header">
@@ -90,34 +95,41 @@
         </div>
     </div>
 
-    <!-- 하단 네비게이션 바 -->
+    <!-- 하단 네비게이션 -->
     <div class="bottom-nav">
-        <!-- 좌측 빈 공간 (균형 유지) -->
-        <div class="nav-item"></div>
-        
-        <!-- 중앙 둥근 홈 버튼 -->
-        <div class="nav-item-center" onclick="switchTab('main')">
-            <div class="center-round-btn">🏠</div>
+        <!-- 홈 아이콘 (검정 외곽선) -->
+        <div class="nav-item active" id="nav-main" onclick="switchTab('main')">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
         </div>
-        
-        <!-- 우측 캘린더 버튼 -->
-        <div class="nav-item" onclick="switchTab('calendar')">📅</div>
+        <!-- 캘린더 아이콘 (검정 외곽선) -->
+        <div class="nav-item" id="nav-calendar" onclick="switchTab('calendar')">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+        </div>
     </div>
 
     <!-- 등록 모달 -->
     <div id="register-modal" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 style="margin-top: 0; text-align: center;">새로운 과목 등록</h3>
-            <input type="text" id="subject-input" placeholder="어떤 공부를 할 건가요?">
-            <button class="modal-btn" onclick="saveSubject()">등록하기</button>
+            <h3 style="margin-top: 0; text-align: center;">과목 등록</h3>
+            <input type="text" id="subject-input" placeholder="과목명 (예: 백준 알고리즘)">
+            <input type="number" id="target-input" placeholder="하루 목표 시간 (분 단위)" min="1">
+            <button class="modal-btn" onclick="saveSubject()">추가하기</button>
         </div>
     </div>
 
     <script>
-        // === 1. 상태 및 타이머 로직 ===
         let tasks = [];
         let activeTimerId = null;
         let timerInterval = null;
+        let detailCache = {}; // 반응 속도 향상을 위한 데이터 캐시
 
         function formatTime(totalSeconds) {
             const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -135,14 +147,17 @@
 
         async function saveSubject() {
             const subject = document.getElementById('subject-input').value;
+            const target_minutes = parseInt(document.getElementById('target-input').value) || 0;
             if (!subject) return;
+
             const res = await fetch('/api/records/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject })
+                body: JSON.stringify({ subject, target_minutes })
             });
             if (res.ok) {
                 document.getElementById('subject-input').value = '';
+                document.getElementById('target-input').value = '';
                 closeModal();
                 loadTodayTasks();
             }
@@ -150,56 +165,39 @@
 
         function toggleTimer(id) {
             const task = tasks.find(t => t.id === id);
-            
-            // 다른 타이머가 켜져있다면 끄고 저장
             if (activeTimerId && activeTimerId !== id) {
                 clearInterval(timerInterval);
                 updateTaskToServer(activeTimerId);
                 const prevBtn = document.getElementById(`btn-${activeTimerId}`);
                 if(prevBtn) { prevBtn.innerHTML = '▶'; prevBtn.classList.remove('stop-btn'); }
             }
-
             const btn = document.getElementById(`btn-${id}`);
-            
             if (activeTimerId === id) {
-                // 정지
                 clearInterval(timerInterval);
                 activeTimerId = null;
                 btn.innerHTML = '▶';
                 btn.classList.remove('stop-btn');
                 updateTaskToServer(id);
             } else {
-                // 시작
                 activeTimerId = id;
                 btn.innerHTML = '■';
                 btn.classList.add('stop-btn');
-                
                 timerInterval = setInterval(() => {
                     task.seconds++;
                     document.getElementById(`time-${id}`).textContent = formatTime(task.seconds);
-                    
-                    // 핵심: 10초마다 서버에 자동 임시 저장 (데이터 증발 방지)
-                    if (task.seconds % 10 === 0) {
-                        updateTaskToServer(id);
-                    }
+                    if (task.seconds % 10 === 0) updateTaskToServer(id);
                 }, 1000);
             }
         }
 
         function toggleComplete(id, isChecked) {
-            const task = tasks.find(t => t.id === id);
-            task.is_completed = isChecked;
+            tasks.find(t => t.id === id).is_completed = isChecked;
             updateTaskToServer(id);
         }
 
         async function updateTaskToServer(id) {
             const task = tasks.find(t => t.id === id);
-            // 핵심: 1초라도 했다면 1분으로 올림 처리 (단 0초는 제외)
-            let duration_minutes = 0;
-            if (task.seconds > 0) {
-                duration_minutes = Math.max(1, Math.ceil(task.seconds / 60));
-            }
-            
+            let duration_minutes = task.seconds > 0 ? Math.max(1, Math.ceil(task.seconds / 60)) : 0;
             await fetch(`/api/records/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -212,11 +210,13 @@
             container.innerHTML = '';
             tasks.forEach(task => {
                 const isRunning = activeTimerId === task.id;
+                const targetText = task.target_minutes > 0 ? `<div style="font-size:12px; color:#999; margin-top:2px;">목표: ${task.target_minutes}분</div>` : '';
                 container.innerHTML += `
                     <div class="task-item">
                         <div class="task-info">
                             <span class="task-title">${task.subject}</span>
                             <span class="task-time" id="time-${task.id}">${formatTime(task.seconds)}</span>
+                            ${targetText}
                         </div>
                         <div class="task-actions">
                             <button id="btn-${task.id}" class="play-btn ${isRunning ? 'stop-btn' : ''}" onclick="toggleTimer(${task.id})">
@@ -229,31 +229,32 @@
             });
         }
 
-        // === 2. 화면 전환 (탭) 제어 ===
         async function switchTab(tabName) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
             document.getElementById(`${tabName}-view`).classList.add('active');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
             
             if (tabName === 'calendar') {
-                await loadHeatmapData(); // 캘린더 진입 시 최신 시간 데이터 불러오기
+                await loadHeatmapData(); 
                 renderCalendar();
             }
         }
 
-        // 모달 제어
         function openModal() { document.getElementById('register-modal').style.display = 'block'; }
         function closeModal(e) { document.getElementById('register-modal').style.display = 'none'; }
 
-        // === 3. 스와이프 가능한 달력 로직 ===
+        // --- 캘린더 로직 ---
         let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth(); // 0 ~ 11
+        let currentMonth = new Date().getMonth();
         let monthlyData = {};
 
         async function loadHeatmapData() {
             const res = await fetch('/api/heatmap/');
             const data = await res.json();
             monthlyData = {};
-            data.forEach(d => { monthlyData[d.date] = d.value; });
+            data.forEach(d => { monthlyData[d.date] = d; });
         }
 
         function renderCalendar() {
@@ -261,31 +262,44 @@
             const grid = document.getElementById('cal-grid');
             grid.innerHTML = '';
 
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 일(0) ~ 토(6)
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const today = new Date();
 
-            // 1일 앞의 빈 공간 채우기
-            for (let i = 0; i < firstDay; i++) {
-                grid.innerHTML += `<div class="cal-cell empty"></div>`;
-            }
+            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="cal-cell empty"></div>`;
 
-            // 날짜 채우기
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const isToday = (today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === d);
                 
-                const totalMinutes = monthlyData[dateStr] || 0;
+                const dayData = monthlyData[dateStr] || { value: 0, target: 0 };
+                const totalMinutes = dayData.value;
+                const targetMinutes = dayData.target;
+                
+                let bgColorClass = '';
+                let textClass = '';
+                
+                // 달성도 계산 (빨간색 / 초록색 표시 로직)
+                if (targetMinutes > 0) {
+                    if (totalMinutes >= targetMinutes) {
+                        bgColorClass = 'success'; textClass = 'success';
+                    } else if (totalMinutes > 0) {
+                        bgColorClass = 'fail'; textClass = 'fail';
+                    }
+                } else if (totalMinutes > 0) {
+                    bgColorClass = 'success'; textClass = 'success'; // 목표설정이 없는데 공부를 했다면 기본 초록색
+                }
+
                 let recordBadge = '';
                 if (totalMinutes > 0) {
                     const h = Math.floor(totalMinutes / 60);
                     const m = totalMinutes % 60;
                     const timeText = h > 0 ? `${h}h ${m}m` : `${m}m`;
-                    recordBadge = `<div class="cal-record">${timeText}</div>`;
+                    recordBadge = `<div class="cal-record ${textClass}">${timeText}</div>`;
                 }
 
                 grid.innerHTML += `
-                    <div class="cal-cell ${isToday ? 'today' : ''}" onclick="showDetail('${dateStr}')">
+                    <div class="cal-cell ${bgColorClass}" style="${isToday ? 'border: 2px solid #000;' : ''}" onclick="showDetail('${dateStr}')">
                         <span class="cal-date-num">${d}</span>
                         ${recordBadge}
                     </div>
@@ -300,41 +314,51 @@
             renderCalendar();
         }
 
-        // 스와이프 이벤트 처리
         let startX = 0;
         const calWrapper = document.getElementById('cal-wrapper');
-        
-        calWrapper.addEventListener('touchstart', (e) => {
-            startX = e.changedTouches[0].screenX;
-        }, {passive: true});
-
-        calWrapper.addEventListener('touchend', (e) => {
+        calWrapper.addEventListener('touchstart', e => { startX = e.changedTouches[0].screenX; }, {passive: true});
+        calWrapper.addEventListener('touchend', e => {
             const endX = e.changedTouches[0].screenX;
-            if (endX < startX - 50) changeMonth(1);  // 왼쪽으로 밀면 다음 달
-            if (endX > startX + 50) changeMonth(-1); // 오른쪽으로 밀면 이전 달
+            if (endX < startX - 50) changeMonth(1);
+            if (endX > startX + 50) changeMonth(-1);
         }, {passive: true});
 
-        // 특정 날짜 클릭 시 상세 기록
-        async function showDetail(dateStr) {
+        // 🚀 캐싱을 적용하여 클릭 즉시 반응하는 상세 화면 로직
+        function showDetail(dateStr) {
             document.getElementById('detail-date').textContent = `${dateStr} 상세 기록`;
             document.getElementById('day-detail').style.display = 'block';
+            const list = document.getElementById('detail-list');
             
-            const res = await fetch(`/api/records/date/${dateStr}`);
-            const data = await res.json();
+            // 1. 임시 저장된 데이터가 있으면 0초 만에 화면에 그리기
+            if (detailCache[dateStr]) {
+                drawDetailList(detailCache[dateStr]);
+            } else {
+                list.innerHTML = '<li style="color:#999;">기록을 불러오는 중...</li>';
+            }
+            
+            // 2. 백그라운드에서 최신 데이터를 받아와서 조용히 새로고침
+            fetch(`/api/records/date/${dateStr}`)
+                .then(res => res.json())
+                .then(data => {
+                    detailCache[dateStr] = data; // 캐시 저장
+                    drawDetailList(data);
+                });
+        }
+
+        function drawDetailList(data) {
             const list = document.getElementById('detail-list');
             list.innerHTML = '';
-            
             if(data.length === 0) {
                 list.innerHTML = '<li>학습 기록이 없습니다.</li>';
             } else {
                 data.forEach(d => {
                     const check = d.is_completed ? "✅" : "❌";
-                    list.innerHTML += `<li style="margin-bottom: 8px;">${check} ${d.subject} - <b style="color:#007aff;">${d.duration_minutes}분</b></li>`;
+                    const targetInfo = d.target_minutes > 0 ? ` / 목표 ${d.target_minutes}분` : '';
+                    list.innerHTML += `<li style="margin-bottom: 8px;">${check} ${d.subject} - <b style="color:#000;">${d.duration_minutes}분</b><span style="font-size:12px;color:#888">${targetInfo}</span></li>`;
                 });
             }
         }
 
-        // 앱 켜질 때 초기 세팅
         loadTodayTasks();
     </script>
 </body>
