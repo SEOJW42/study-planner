@@ -3,84 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 앱 이름은 Planner 유지 -->
     <title>Planner</title>
     <link rel="manifest" href="manifest.json">
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; background-color: #f2f2f7; color: #000; padding-bottom: 90px; user-select: none; }
+        /* === 다크/라이트 모드 색상 변수 설정 === */
+        :root {
+            --bg-main: #f2f2f7;
+            --bg-card: #ffffff;
+            --text-main: #000000;
+            --text-sub: #666666;
+            --border: #eeeeee;
+            --nav-bg: #ffffff;
+            --icon-stroke: #8e8e93;
+            --icon-active: #000000;
+            --cal-cell: #f9f9f9;
+        }
+
+        .dark-mode {
+            --bg-main: #000000;
+            --bg-card: #1c1c1e;
+            --text-main: #ffffff;
+            --text-sub: #ebebf599;
+            --border: #38383a;
+            --nav-bg: #1c1c1e;
+            --icon-stroke: #8e8e93;
+            --icon-active: #ffffff;
+            --cal-cell: #2c2c2e;
+        }
+
+        body { font-family: -apple-system, sans-serif; margin: 0; background-color: var(--bg-main); color: var(--text-main); padding-bottom: 90px; user-select: none; transition: background-color 0.3s, color 0.3s; }
         
-        /* 앱 배너 가벼운 폰트 적용 */
-        .header { padding: 20px; background: white; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: #000; }
-        .header-title { font-size: 20px; font-weight: 400; letter-spacing: -0.5px; } /* 가벼운 느낌 */
+        .header { padding: 20px 20px 10px 20px; background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; transition: background-color 0.3s; }
+        .header-title { font-size: 22px; font-weight: bold; letter-spacing: -0.5px; }
         
-        .view { display: none; padding: 10px 20px; }
+        /* 날짜 네비게이터 */
+        .date-navigator { background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 20px 20px; margin-bottom: 15px; border-bottom: 1px solid var(--border); transition: background-color 0.3s; }
+        .date-navigator button { background: none; border: none; font-size: 18px; color: #007aff; cursor: pointer; padding: 5px 15px; font-weight: bold; }
+        .date-text { font-size: 16px; font-weight: bold; color: var(--text-main); }
+
+        .view { display: none; padding: 0 20px 10px 20px; }
         .view.active { display: block; }
 
-        /* 스와이프 배경 및 카드 래퍼 */
+        /* 스와이프 및 아이템 */
         .task-wrapper { position: relative; margin-bottom: 10px; border-radius: 12px; background: transparent; overflow: hidden; }
-        .swipe-actions { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; gap: 8px; padding-left: 10px; }
+        .swipe-actions { position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center; flex-direction: row; gap: 8px; padding-right: 10px; }
         .swipe-btn { height: 75%; border: none; border-radius: 8px; color: white; padding: 0 15px; font-weight: bold; font-size: 14px; cursor: pointer; }
         .swipe-edit { background: #8e8e93; }
         .swipe-delete { background: #ff3b30; font-size: 18px; }
 
-        .task-item { position: relative; z-index: 2; background: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.3s; }
-        
+        .task-item { position: relative; z-index: 2; background: var(--bg-card); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.3s, background-color 0.3s; }
         .task-info { display: flex; flex-direction: column; }
-        .task-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-        .task-time { font-size: 14px; color: #666; font-variant-numeric: tabular-nums; }
+        .task-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: var(--text-main); }
+        .task-time { font-size: 14px; color: var(--text-sub); font-variant-numeric: tabular-nums; }
         .task-actions { display: flex; align-items: center; gap: 15px; }
         .play-btn { background: #007aff; color: white; border: none; width: 44px; height: 44px; border-radius: 22px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
         .stop-btn { background: #ff3b30; }
         input[type="checkbox"] { width: 24px; height: 24px; accent-color: #34c759; }
 
-        /* 캘린더 CSS 생략 (이전과 동일) */
-        .cal-wrapper { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
+        /* 캘린더 */
+        .cal-wrapper { background: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; margin-top: 15px; transition: background-color 0.3s; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .cal-header button { background: none; border: none; font-size: 20px; color: #000; cursor: pointer; padding: 10px; }
+        .cal-header button { background: none; border: none; font-size: 20px; color: var(--text-main); cursor: pointer; padding: 10px; }
         .cal-day-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 8px; }
         .cal-day-name { text-align: center; font-size: 12px; font-weight: bold; color: #8e8e93; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .cal-cell { aspect-ratio: 1/1; background: #f9f9f9; border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; cursor: pointer; border: 1.5px solid transparent; }
-        .cal-cell.empty { background: transparent; cursor: default; }
-        .cal-cell.success { border-color: #34c759; background: #e8f5e9; }
-        .cal-cell.fail { border-color: #ff3b30; background: #ffebee; }
-        .cal-date-num { position: absolute; top: 4px; right: 6px; font-size: 13px; font-weight: bold; color: #333; }
-        .cal-record { font-size: 11px; font-weight: bold; color: #666; padding: 2px 6px; border-radius: 8px; }
-        .cal-record.success { color: #2e7d32; background: rgba(52, 199, 89, 0.2); }
-        .cal-record.fail { color: #c62828; background: rgba(255, 59, 48, 0.2); }
-        .detail-card { background: white; padding: 15px; border-radius: 12px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .cal-cell { aspect-ratio: 1/1; background: var(--cal-cell); border-radius: 8px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; cursor: pointer; border: 1.5px solid transparent; transition: background-color 0.3s; }
+        .cal-cell.empty { background: transparent; cursor: default; border: none; }
+        .cal-cell.success { border-color: #34c759; background: rgba(52, 199, 89, 0.15); }
+        .cal-cell.fail { border-color: #ff3b30; background: rgba(255, 59, 48, 0.15); }
+        .cal-date-num { position: absolute; top: 4px; right: 6px; font-size: 13px; font-weight: bold; color: var(--text-main); }
+        .cal-record { font-size: 11px; font-weight: bold; color: var(--text-sub); padding: 2px 6px; border-radius: 8px; }
+        .cal-record.success { color: #34c759; }
+        .cal-record.fail { color: #ff3b30; }
+        .detail-card { background: var(--bg-card); padding: 15px; border-radius: 12px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background-color 0.3s; }
 
-        /* 하단 네비게이션 */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #ddd; padding-bottom: env(safe-area-inset-bottom); height: 65px; z-index: 1000; }
+        /* 하단 네비게이션 (설정 아이콘 추가) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); height: 65px; z-index: 1000; transition: background-color 0.3s; }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 100%; cursor: pointer; color: #8e8e93; }
-        .nav-item svg { stroke: #8e8e93; transition: stroke 0.2s; }
-        .nav-item.active svg { stroke: #000; }
+        .nav-item svg { stroke: var(--icon-stroke); transition: stroke 0.2s; }
+        .nav-item.active svg { stroke: var(--icon-active); }
 
-        /* 모달 및 시간 휠 스크롤 UI */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; }
-        .modal-content { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 16px; width: 80%; max-width: 320px; }
-        .modal-content input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .modal-btn { width: 100%; padding: 14px; background: #000; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 15px;}
+        /* 다크모드 토글 스위치 UI */
+        .setting-item { background: var(--bg-card); padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; margin-top: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background-color 0.3s; }
+        .toggle-switch { position: relative; width: 50px; height: 30px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 30px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #34c759; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* 모달 UI */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); padding: 20px; border-radius: 16px; width: 80%; max-width: 320px; transition: background-color 0.3s; }
+        .modal-content input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 16px; background: transparent; color: var(--text-main); }
+        .modal-btn { width: 100%; padding: 14px; background: var(--text-main); color: var(--bg-main); border: none; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 20px;}
         
-        .time-picker-container { display: flex; gap: 10px; margin-top: 15px; }
-        .time-box { flex: 1; display: flex; align-items: center; border: 1px solid #ccc; border-radius: 8px; padding: 0 10px; background: #fafafa; }
+        .day-picker { display: flex; justify-content: space-between; margin-top: 10px; }
+        .day-btn { width: 36px; height: 36px; border-radius: 18px; background: var(--cal-cell); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
+        .day-btn.active { background: #007aff; color: white; }
+
+        .time-picker-container { display: flex; gap: 10px; margin-top: 10px; }
+        .time-box { flex: 1; display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; background: var(--cal-cell); }
         .time-box select { flex: 1; border: none; background: transparent; font-size: 18px; padding: 12px 0; outline: none; appearance: none; text-align: center; font-weight: bold; color: #007aff;}
     </style>
 </head>
 <body>
 
-    <!-- 메인 뷰 -->
-    <div id="main-view" class="view active">
+    <!-- 1. 메인 뷰 (과목 목록) -->
+    <div id="main-view" class="view active" style="padding-top:0;">
         <div class="header">
-            <span class="header-title">무계획이 계획</span>
-            <button onclick="openModal('register')" style="background:none; border:none; font-size:24px; cursor:pointer; color:#000;">➕</button>
+            <span class="header-title">과목 목록</span>
+            <button onclick="openModal('register')" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-main);">➕</button>
         </div>
+        
+        <div class="date-navigator">
+            <button onclick="changeDate(-1)">◀</button>
+            <span id="current-date-display" class="date-text"></span>
+            <button onclick="changeDate(1)">▶</button>
+        </div>
+
         <div id="task-container"></div>
     </div>
 
-    <!-- 캘린더 뷰 -->
+    <!-- 2. 캘린더 뷰 -->
     <div id="calendar-view" class="view">
-        <div class="header" style="margin-bottom: 20px;"><span class="header-title">학습 기록</span></div>
+        <div class="header" style="padding: 20px 0 0 0;"><span class="header-title">학습 기록</span></div>
         <div class="cal-wrapper" id="cal-wrapper">
             <div class="cal-header">
                 <button onclick="changeMonth(-1)">◀</button>
@@ -104,55 +151,135 @@
         </div>
     </div>
 
-    <!-- 하단 네비게이션 -->
-    <div class="bottom-nav">
-        <div class="nav-item active" id="nav-main" onclick="switchTab('main')">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-        </div>
-        <div class="nav-item" id="nav-calendar" onclick="switchTab('calendar')">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
+    <!-- 3. 설정 뷰 (다크모드 포함) -->
+    <div id="settings-view" class="view">
+        <div class="header" style="padding: 20px 0 0 0;"><span class="header-title">설정</span></div>
+        <div class="setting-item">
+            <span>다크 모드</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+                <span class="slider"></span>
+            </label>
         </div>
     </div>
 
-    <!-- 통합 모달창 (등록 / 수정 공용) -->
+    <!-- 하단 네비게이션 (홈, 캘린더, 설정) -->
+    <div class="bottom-nav">
+        <!-- 홈 -->
+        <div class="nav-item active" id="nav-main" onclick="switchTab('main')">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </div>
+        <!-- 캘린더 -->
+        <div class="nav-item" id="nav-calendar" onclick="switchTab('calendar')">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        <!-- 설정 (톱니바퀴) -->
+        <div class="nav-item" id="nav-settings" onclick="switchTab('settings')">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+    </div>
+
+    <!-- 등록/수정 모달창 -->
     <div id="form-modal" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 id="modal-title" style="margin-top: 0; text-align: center;">과목 등록</h3>
-            <input type="text" id="subject-input" placeholder="과목명 (예: 백준 알고리즘)">
+            <input type="text" id="subject-input" placeholder="과목명 (예: 알고리즘)">
             
-            <div style="font-size: 14px; color: #666; margin-top: 15px; text-align: center;">하루 목표 시간</div>
-            <!-- 아이폰 네이티브 휠을 띄우는 select 태그 -->
+            <div style="font-size: 14px; color: var(--text-sub); margin-top: 15px; text-align: center;">반복 요일 선택</div>
+            <div class="day-picker">
+                <div class="day-btn" data-day="0" onclick="toggleDay(0)">일</div>
+                <div class="day-btn" data-day="1" onclick="toggleDay(1)">월</div>
+                <div class="day-btn" data-day="2" onclick="toggleDay(2)">화</div>
+                <div class="day-btn" data-day="3" onclick="toggleDay(3)">수</div>
+                <div class="day-btn" data-day="4" onclick="toggleDay(4)">목</div>
+                <div class="day-btn" data-day="5" onclick="toggleDay(5)">금</div>
+                <div class="day-btn" data-day="6" onclick="toggleDay(6)">토</div>
+            </div>
+
+            <div style="font-size: 14px; color: var(--text-sub); margin-top: 20px; text-align: center;">하루 목표 시간</div>
             <div class="time-picker-container">
-                <div class="time-box">
-                    <select id="target-hours"></select>
-                    <span style="font-size:14px; color:#333;">시간</span>
-                </div>
-                <div class="time-box">
-                    <select id="target-minutes"></select>
-                    <span style="font-size:14px; color:#333;">분</span>
-                </div>
+                <div class="time-box"><select id="target-hours"></select><span style="font-size:14px; color:var(--text-main);">시간</span></div>
+                <div class="time-box"><select id="target-minutes"></select><span style="font-size:14px; color:var(--text-main);">분</span></div>
             </div>
 
             <button id="modal-submit-btn" class="modal-btn">추가하기</button>
-            <input type="hidden" id="edit-id"> <!-- 수정 시 사용하는 숨김 ID -->
+            <input type="hidden" id="edit-uuid">
+            <input type="hidden" id="edit-type">
+            <input type="hidden" id="edit-id">
         </div>
     </div>
 
     <script>
         let tasks = [];
-        let activeTimerId = null;
+        let activeTimerId = null; 
         let timerInterval = null;
         let detailCache = {};
+        
+        let viewingDate = new Date();
+        let selectedDays = []; 
+        let monthlyData = {}; // 캘린더 캐싱용
 
-        // 0~23시간, 0~59분 선택지 채우기
+        // --- 다크 모드 제어 로직 ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('dark-mode-toggle').checked = true;
+            }
+        }
+        function toggleDarkMode() {
+            const isDark = document.getElementById('dark-mode-toggle').checked;
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        initTheme();
+
+        // 🚀 Pre-fetching (프리패치) 기능: 서버에서 캘린더 데이터를 백그라운드로 미리 받아옵니다.
+        async function prefetchHeatmapData() {
+            try {
+                const res = await fetch('/api/heatmap/');
+                const data = await res.json();
+                monthlyData = {};
+                data.forEach(d => { monthlyData[d.date] = d; });
+            } catch (error) {
+                console.error("데이터 사전 로딩 실패", error);
+            }
+        }
+
+        function toLocalISOString(date) {
+            const offset = date.getTimezoneOffset() * 60000;
+            return (new Date(date - offset)).toISOString().split('T')[0];
+        }
+
+        function updateDateUI() {
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const dateStr = `${viewingDate.getFullYear()}년 ${viewingDate.getMonth()+1}월 ${viewingDate.getDate()}일 (${days[viewingDate.getDay()]})`;
+            document.getElementById('current-date-display').textContent = dateStr;
+        }
+
+        function changeDate(offset) {
+            if (activeTimerId) { toggleTimer(activeTimerId); }
+            viewingDate.setDate(viewingDate.getDate() + offset);
+            updateDateUI();
+            loadTasksForDate();
+        }
+
+        function toggleDay(dayIdx) {
+            const idx = selectedDays.indexOf(dayIdx);
+            if (idx > -1) selectedDays.splice(idx, 1);
+            else selectedDays.push(dayIdx);
+            
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                if(selectedDays.includes(parseInt(btn.dataset.day))) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
         function initTimePickers() {
             const hSel = document.getElementById('target-hours');
             const mSel = document.getElementById('target-minutes');
@@ -168,36 +295,30 @@
             return `${h}:${m}:${s}`;
         }
 
-        async function loadTodayTasks() {
-            const res = await fetch('/api/records/today');
+        async function loadTasksForDate() {
+            const dateStr = toLocalISOString(viewingDate);
+            const res = await fetch(`/api/tasks/${dateStr}`);
             tasks = await res.json();
             tasks.forEach(t => t.seconds = t.duration_minutes * 60);
             renderTasks();
         }
 
-        // 스와이프 제스처 이벤트 적용
         function attachSwipeEvents() {
             document.querySelectorAll('.task-item').forEach(el => {
                 let startX = 0;
                 el.addEventListener('touchstart', e => { startX = e.changedTouches[0].screenX; }, {passive: true});
-                
                 el.addEventListener('touchmove', e => {
                     let deltaX = e.changedTouches[0].screenX - startX;
-                    // 오른쪽으로 밀 때만 (버튼 보이기)
-                    if (deltaX > 0 && deltaX < 150) {
+                    if (deltaX < 0 && deltaX > -150) {
                         el.style.transform = `translateX(${deltaX}px)`;
                         el.style.transition = 'none';
                     }
                 }, {passive: true});
-                
                 el.addEventListener('touchend', e => {
                     let deltaX = e.changedTouches[0].screenX - startX;
                     el.style.transition = 'transform 0.3s';
-                    if (deltaX > 60) {
-                        el.style.transform = `translateX(140px)`; // 버튼 공간만큼 열림 고정
-                    } else {
-                        el.style.transform = `translateX(0px)`; // 다시 닫힘
-                    }
+                    if (deltaX < -60) el.style.transform = `translateX(-140px)`;
+                    else el.style.transform = `translateX(0px)`;
                 }, {passive: true});
             });
         }
@@ -205,185 +326,201 @@
         function renderTasks() {
             const container = document.getElementById('task-container');
             container.innerHTML = '';
+            
+            if(tasks.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 40px; color:var(--text-sub);">이 날짜에 계획된 과목이 없습니다.</div>';
+                return;
+            }
+
             tasks.forEach(task => {
-                const isRunning = activeTimerId === task.id;
+                const isRunning = activeTimerId === task.uuid;
                 let targetText = '';
                 if (task.target_minutes > 0) {
                     const h = Math.floor(task.target_minutes / 60);
                     const m = task.target_minutes % 60;
-                    targetText = `<div style="font-size:12px; color:#999; margin-top:2px;">목표: ${h>0?h+'시간 ':''}${m}분</div>`;
+                    targetText = `<div style="font-size:12px; color:var(--text-sub); margin-top:2px;">목표: ${h>0?h+'시간 ':''}${m}분</div>`;
                 }
 
                 container.innerHTML += `
                     <div class="task-wrapper">
                         <div class="swipe-actions">
-                            <button class="swipe-btn swipe-edit" onclick="openModal('edit', ${task.id})">수정</button>
-                            <button class="swipe-btn swipe-delete" onclick="confirmDelete(${task.id})">🗑️</button>
+                            <button class="swipe-btn swipe-edit" onclick="openModal('edit', '${task.uuid}')">수정</button>
+                            <button class="swipe-btn swipe-delete" onclick="confirmDelete('${task.uuid}')">🗑️</button>
                         </div>
-                        <div class="task-item" id="task-${task.id}">
+                        <div class="task-item" id="task-${task.uuid}">
                             <div class="task-info">
                                 <span class="task-title">${task.subject}</span>
-                                <span class="task-time" id="time-${task.id}">${formatTime(task.seconds)}</span>
+                                <span class="task-time" id="time-${task.uuid}">${formatTime(task.seconds)}</span>
                                 ${targetText}
                             </div>
                             <div class="task-actions">
-                                <button id="btn-${task.id}" class="play-btn ${isRunning ? 'stop-btn' : ''}" onclick="toggleTimer(${task.id})">
+                                <button id="btn-${task.uuid}" class="play-btn ${isRunning ? 'stop-btn' : ''}" onclick="toggleTimer('${task.uuid}')">
                                     ${isRunning ? '■' : '▶'}
                                 </button>
-                                <input type="checkbox" ${task.is_completed ? 'checked' : ''} onchange="toggleComplete(${task.id}, this.checked)">
+                                <input type="checkbox" ${task.is_completed ? 'checked' : ''} onchange="toggleComplete('${task.uuid}', this.checked)">
                             </div>
                         </div>
                     </div>
                 `;
             });
-            attachSwipeEvents(); // 렌더링 후 터치 이벤트 장착
+            attachSwipeEvents(); 
         }
 
-        // --- 모달 로직 (등록 및 수정) ---
-        function openModal(mode, id = null) {
+        function openModal(mode, uuid = null) {
             const modal = document.getElementById('form-modal');
-            const title = document.getElementById('modal-title');
             const submitBtn = document.getElementById('modal-submit-btn');
             
             if (mode === 'register') {
-                title.textContent = '과목 등록';
+                document.getElementById('modal-title').textContent = '과목 등록';
                 submitBtn.textContent = '추가하기';
-                submitBtn.onclick = saveSubject;
+                submitBtn.onclick = submitForm;
                 document.getElementById('subject-input').value = '';
                 document.getElementById('target-hours').value = '0';
                 document.getElementById('target-minutes').value = '0';
+                selectedDays = [viewingDate.getDay()];
             } else if (mode === 'edit') {
-                const task = tasks.find(t => t.id === id);
-                title.textContent = '과목 수정';
+                const task = tasks.find(t => t.uuid === uuid);
+                document.getElementById('modal-title').textContent = '과목 수정';
                 submitBtn.textContent = '수정완료';
-                submitBtn.onclick = editSubject;
-                document.getElementById('edit-id').value = id;
+                submitBtn.onclick = submitForm;
+                document.getElementById('edit-uuid').value = uuid;
+                document.getElementById('edit-type').value = task.type;
+                document.getElementById('edit-id').value = task.id;
                 document.getElementById('subject-input').value = task.subject;
                 document.getElementById('target-hours').value = Math.floor(task.target_minutes / 60);
                 document.getElementById('target-minutes').value = task.target_minutes % 60;
                 
-                // 열려있는 스와이프 닫기
-                document.getElementById(`task-${id}`).style.transform = 'translateX(0px)';
+                selectedDays = task.repeat_days ? task.repeat_days.split(',').map(Number) : [];
+                document.getElementById(`task-${uuid}`).style.transform = 'translateX(0px)';
             }
+            
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                if(selectedDays.includes(parseInt(btn.dataset.day))) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
             modal.style.display = 'block';
         }
 
         function closeModal(e) { document.getElementById('form-modal').style.display = 'none'; }
 
-        async function saveSubject() {
+        async function submitForm() {
+            const btn = document.getElementById('modal-submit-btn');
+            const isEdit = btn.textContent === '수정완료';
+            
             const subject = document.getElementById('subject-input').value;
             const h = parseInt(document.getElementById('target-hours').value);
             const m = parseInt(document.getElementById('target-minutes').value);
             const target_minutes = (h * 60) + m;
+            const repeat_days = selectedDays.join(',');
             
-            if (!subject) return;
+            if (!subject) return alert("과목명을 입력해주세요.");
+            if (selectedDays.length === 0) return alert("최소 하루 이상의 요일을 선택해주세요.");
 
-            const res = await fetch('/api/records/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject, target_minutes })
-            });
-            if (res.ok) { closeModal(); loadTodayTasks(); }
-        }
+            btn.disabled = true;
+            btn.textContent = '저장 중...';
 
-        async function editSubject() {
-            const id = document.getElementById('edit-id').value;
-            const subject = document.getElementById('subject-input').value;
-            const h = parseInt(document.getElementById('target-hours').value);
-            const m = parseInt(document.getElementById('target-minutes').value);
-            const target_minutes = (h * 60) + m;
-            
-            if (!subject) return;
-
-            const res = await fetch(`/api/records/${id}/edit`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject, target_minutes })
-            });
-            if (res.ok) { closeModal(); loadTodayTasks(); }
-        }
-
-        // --- 삭제 로직 ---
-        async function confirmDelete(id) {
-            // 삭제 의사 묻기 알림창
-            if (confirm("정말로 이 과목을 삭제 하겠습니까?")) {
-                const res = await fetch(`/api/records/${id}`, { method: 'DELETE' });
-                if (res.ok) loadTodayTasks();
+            if (!isEdit) {
+                const res = await fetch('/api/routines/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subject, target_minutes, repeat_days })
+                });
+                if (res.ok) { closeModal(); loadTasksForDate(); prefetchHeatmapData(); }
             } else {
-                // 취소 시 스와이프 원상복구
-                document.getElementById(`task-${id}`).style.transform = 'translateX(0px)';
+                const type = document.getElementById('edit-type').value;
+                const id = document.getElementById('edit-id').value;
+                const res = await fetch(`/api/tasks/${type}/${id}/edit`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subject, target_minutes, repeat_days })
+                });
+                if (res.ok) { closeModal(); loadTasksForDate(); prefetchHeatmapData(); }
+            }
+            btn.disabled = false;
+        }
+
+        async function confirmDelete(uuid) {
+            const task = tasks.find(t => t.uuid === uuid);
+            if (confirm("정말로 이 과목을 삭제 하겠습니까?")) {
+                const res = await fetch(`/api/tasks/${task.type}/${task.id}`, { method: 'DELETE' });
+                if (res.ok) { loadTasksForDate(); prefetchHeatmapData(); }
+            } else {
+                document.getElementById(`task-${uuid}`).style.transform = 'translateX(0px)';
             }
         }
 
-        // 타이머 및 기타 로직 (기존과 동일)
-        function toggleTimer(id) {
-            const task = tasks.find(t => t.id === id);
-            // 클릭 시 열려있는 스와이프가 있다면 닫기
+        function toggleTimer(uuid) {
+            const task = tasks.find(t => t.uuid === uuid);
             document.querySelectorAll('.task-item').forEach(el => el.style.transform = 'translateX(0px)');
 
-            if (activeTimerId && activeTimerId !== id) {
+            if (activeTimerId && activeTimerId !== uuid) {
                 clearInterval(timerInterval);
-                updateTaskToServer(activeTimerId);
+                syncTaskToServer(activeTimerId);
                 const prevBtn = document.getElementById(`btn-${activeTimerId}`);
                 if(prevBtn) { prevBtn.innerHTML = '▶'; prevBtn.classList.remove('stop-btn'); }
             }
-            const btn = document.getElementById(`btn-${id}`);
-            if (activeTimerId === id) {
+            
+            const btn = document.getElementById(`btn-${uuid}`);
+            if (activeTimerId === uuid) {
                 clearInterval(timerInterval);
                 activeTimerId = null;
                 btn.innerHTML = '▶';
                 btn.classList.remove('stop-btn');
-                updateTaskToServer(id);
+                syncTaskToServer(uuid);
             } else {
-                activeTimerId = id;
+                activeTimerId = uuid;
                 btn.innerHTML = '■';
                 btn.classList.add('stop-btn');
                 timerInterval = setInterval(() => {
                     task.seconds++;
-                    document.getElementById(`time-${id}`).textContent = formatTime(task.seconds);
-                    if (task.seconds % 10 === 0) updateTaskToServer(id);
+                    document.getElementById(`time-${uuid}`).textContent = formatTime(task.seconds);
+                    if (task.seconds % 10 === 0) syncTaskToServer(uuid);
                 }, 1000);
             }
         }
 
-        function toggleComplete(id, isChecked) {
-            tasks.find(t => t.id === id).is_completed = isChecked;
-            updateTaskToServer(id);
+        function toggleComplete(uuid, isChecked) {
+            tasks.find(t => t.uuid === uuid).is_completed = isChecked;
+            syncTaskToServer(uuid);
         }
 
-        async function updateTaskToServer(id) {
-            const task = tasks.find(t => t.id === id);
+        async function syncTaskToServer(uuid) {
+            const task = tasks.find(t => t.uuid === uuid);
             let duration_minutes = task.seconds > 0 ? Math.max(1, Math.ceil(task.seconds / 60)) : 0;
-            await fetch(`/api/records/${id}`, {
-                method: 'PUT',
+            
+            const payload = {
+                date: toLocalISOString(viewingDate),
+                routine_id: task.routine_id,
+                subject: task.subject,
+                target_minutes: task.target_minutes,
+                duration_minutes: duration_minutes,
+                is_completed: task.is_completed
+            };
+
+            await fetch(`/api/records/sync`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ duration_minutes, is_completed: task.is_completed })
+                body: JSON.stringify(payload)
             });
+            // 백그라운드 캘린더 업데이트
+            prefetchHeatmapData();
         }
 
-        async function switchTab(tabName) {
+        function switchTab(tabName) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`${tabName}-view`).classList.add('active');
             document.getElementById(`nav-${tabName}`).classList.add('active');
             
-            if (tabName === 'calendar') {
-                await loadHeatmapData(); 
-                renderCalendar();
+            // 🚀 프리패치 덕분에 서버를 기다릴 필요 없이 즉시 화면 렌더링
+            if (tabName === 'calendar') { 
+                renderCalendar(); 
             }
         }
 
-        // --- 캘린더 로직 (기존과 동일) ---
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
-        let monthlyData = {};
-
-        async function loadHeatmapData() {
-            const res = await fetch('/api/heatmap/');
-            const data = await res.json();
-            monthlyData = {};
-            data.forEach(d => { monthlyData[d.date] = d; });
-        }
 
         function renderCalendar() {
             document.getElementById('month-title').textContent = `${currentYear}년 ${currentMonth + 1}월`;
@@ -398,6 +535,7 @@
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const isToday = (today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === d);
+                // 미리 로딩된 monthlyData 사용
                 const dayData = monthlyData[dateStr] || { value: 0, target: 0 };
                 const totalMinutes = dayData.value;
                 const targetMinutes = dayData.target;
@@ -417,8 +555,9 @@
                     recordBadge = `<div class="cal-record ${textClass}">${timeText}</div>`;
                 }
 
+                // 다크모드 대응을 위해 테두리 색상을 var(--text-main)으로 변경
                 grid.innerHTML += `
-                    <div class="cal-cell ${bgColorClass}" style="${isToday ? 'border: 2px solid #000;' : ''}" onclick="showDetail('${dateStr}')">
+                    <div class="cal-cell ${bgColorClass}" style="${isToday ? 'border: 2px solid var(--text-main);' : ''}" onclick="showDetail('${dateStr}')">
                         <span class="cal-date-num">${d}</span>
                         ${recordBadge}
                     </div>
@@ -438,7 +577,7 @@
             document.getElementById('day-detail').style.display = 'block';
             const list = document.getElementById('detail-list');
             if (detailCache[dateStr]) drawDetailList(detailCache[dateStr]);
-            else list.innerHTML = '<li style="color:#999;">기록을 불러오는 중...</li>';
+            else list.innerHTML = '<li style="color:var(--text-sub);">기록을 불러오는 중...</li>';
             
             fetch(`/api/records/date/${dateStr}`)
                 .then(res => res.json())
@@ -448,17 +587,21 @@
         function drawDetailList(data) {
             const list = document.getElementById('detail-list');
             list.innerHTML = '';
-            if(data.length === 0) list.innerHTML = '<li>학습 기록이 없습니다.</li>';
+            if(data.length === 0) list.innerHTML = '<li style="color:var(--text-sub);">학습 기록이 없습니다.</li>';
             else {
                 data.forEach(d => {
-                    const check = d.is_completed ? "✅" : "❌";
+                    const check = d.is_completed ? "<span style='color:#34c759; font-weight:bold; margin-right:5px;'>달성</span>" : "<span style='margin-right:5px;'>❌</span>";
                     const targetInfo = d.target_minutes > 0 ? ` / 목표 ${d.target_minutes}분` : '';
-                    list.innerHTML += `<li style="margin-bottom: 8px;">${check} ${d.subject} - <b style="color:#000;">${d.duration_minutes}분</b><span style="font-size:12px;color:#888">${targetInfo}</span></li>`;
+                    list.innerHTML += `<li style="margin-bottom: 8px; display:flex; align-items:center;">${check} <span style="color:var(--text-main);">${d.subject}</span> - <b style="color:var(--text-main); margin:0 5px;">${d.duration_minutes}분</b><span style="font-size:12px;color:var(--text-sub);">${targetInfo}</span></li>`;
                 });
             }
         }
 
-        loadTodayTasks();
+        // 앱 켜질 때 초기 실행 3종 세트
+        updateDateUI();
+        loadTasksForDate();
+        prefetchHeatmapData(); // 백그라운드 캘린더 사전 로딩 시작!
+
     </script>
 </body>
 </html>
