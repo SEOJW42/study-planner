@@ -6,28 +6,53 @@
     <title>Planner</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- 🌟 Chart.js 통계 라이브러리 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* 🌟 글래스모피즘용 반투명 투명도(opacity) 조절 (배경이 비치게) */
         :root { 
-            --bg-main: #f2f2f7; --bg-card: #ffffff; --text-main: #000000; --text-sub: #8e8e93; 
-            --border: #e5e5ea; --icon-stroke: #8e8e93; --icon-active: #000000; --cal-cell: #f9f9f9;
-            /* 글래스모피즘용 반투명 변수 */
-            --glass-bg: rgba(255, 255, 255, 0.85); 
+            --bg-main: #f2f2f7; 
+            --bg-card: rgba(255, 255, 255, 0.7); 
+            --bg-card-solid: #ffffff;
+            --text-main: #000000; 
+            --text-sub: #8e8e93; 
+            --border: rgba(229, 229, 234, 0.5); 
+            --icon-stroke: #8e8e93; 
+            --icon-active: #000000; 
+            --cal-cell: rgba(249, 249, 249, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.65); 
         }
         .dark-mode { 
-            --bg-main: #000000; --bg-card: #1c1c1e; --text-main: #ffffff; --text-sub: #ebebf599; 
-            --border: #38383a; --icon-stroke: #8e8e93; --icon-active: #ffffff; --cal-cell: #2c2c2e;
-            --glass-bg: rgba(28, 28, 30, 0.85);
+            --bg-main: #000000; 
+            --bg-card: rgba(28, 28, 30, 0.75); 
+            --bg-card-solid: #1c1c1e;
+            --text-main: #ffffff; 
+            --text-sub: #ebebf599; 
+            --border: rgba(56, 56, 58, 0.4); 
+            --icon-stroke: #8e8e93; 
+            --icon-active: #ffffff; 
+            --cal-cell: rgba(44, 44, 46, 0.6);
+            --glass-bg: rgba(28, 28, 30, 0.75);
         }
-        body { font-family: -apple-system, sans-serif; margin: 0; background-color: var(--bg-main); color: var(--text-main); padding-bottom: 90px; user-select: none; transition: background-color 0.3s, color 0.3s; }
+        body { 
+            font-family: -apple-system, sans-serif; margin: 0; padding-bottom: 90px; user-select: none; 
+            background-color: var(--bg-main); color: var(--text-main); 
+            transition: background-color 0.3s, color 0.3s; 
+            /* 🌟 배경화면 커스텀을 위한 설정 */
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
         
-        /* 🌟 상단 헤더 글래스모피즘 적용 */
+        /* 반투명 유리 블러 효과를 공통으로 묶어주는 클래스 */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
         .top-bar-container { position: sticky; top: 0; z-index: 100; background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding-bottom: 10px;}
         .header { padding: 24px 20px 12px 20px; display: flex; justify-content: space-between; align-items: center; }
         .header-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
         .date-navigator { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-        .date-navigator button { background: none; border: none; font-size: 20px; color: #007aff; cursor: pointer; padding: 8px 16px; font-weight: 600; }
+        .date-navigator button { background: none; border: none; font-size: 20px; color: #007aff; cursor: pointer; padding: 8px 16px; font-weight: 600; text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
         .date-text { font-size: 17px; font-weight: 600; color: var(--text-main); }
         
         .view { display: none; padding: 20px; }
@@ -37,7 +62,7 @@
         .swipe-actions { position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center; gap: 8px; padding-right: 12px; }
         .swipe-btn { height: calc(100% - 24px); border: none; border-radius: 10px; color: white; padding: 0 16px; font-weight: 600; font-size: 15px; cursor: pointer; }
         .swipe-edit { background: #8e8e93; } .swipe-delete { background: #ff3b30; }
-        .task-item { position: relative; z-index: 2; background: var(--bg-card); padding: 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.3s, background-color 0.3s; border: 1px solid var(--border); }
+        .task-item { position: relative; z-index: 2; padding: 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.3s; }
         .task-info { display: flex; flex-direction: column; justify-content: center; }
         .task-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
         .task-time { font-size: 15px; color: var(--text-sub); font-variant-numeric: tabular-nums; }
@@ -46,28 +71,39 @@
         .stop-btn { background: #ff3b30; box-shadow: 0 2px 5px rgba(255,59,48,0.3); }
         input[type="checkbox"] { width: 26px; height: 26px; accent-color: #34c759; }
 
-        .cal-wrapper { background: var(--bg-card); border-radius: 16px; padding: 20px; border: 1px solid var(--border); }
+        .cal-wrapper { border-radius: 16px; padding: 20px; margin-top: 16px; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 19px; font-weight: 700; }
         .cal-header button { background: none; border: none; font-size: 22px; color: var(--text-main); cursor: pointer; padding: 8px; }
         .cal-day-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 10px; }
-        .cal-day-name { text-align: center; font-size: 13px; font-weight: 600; color: #8e8e93; }
+        .cal-day-name { text-align: center; font-size: 13px; font-weight: 600; color: var(--text-sub); }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .cal-cell { aspect-ratio: 1/1; background: var(--cal-cell); border-radius: 10px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 6px; cursor: pointer; }
+        
+        /* 🌟 캘린더 날짜 셀 디자인 고도화 */
+        .cal-cell { aspect-ratio: 1/1.2; background: var(--cal-cell); border-radius: 10px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 6px; cursor: pointer; transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); border: 2px solid transparent;}
         .cal-cell.empty { background: transparent; cursor: default; }
-        .cal-cell.success { background: rgba(52, 199, 89, 0.15); }
-        .cal-cell.fail { background: rgba(255, 59, 48, 0.15); }
-        .cal-date-num { position: absolute; top: 6px; right: 8px; font-size: 14px; font-weight: 600; color: var(--text-main); }
-        .cal-record { font-size: 12px; font-weight: 700; padding: 2px 6px; border-radius: 8px; }
-        .cal-record.success { color: #34c759; } .cal-record.fail { color: #ff3b30; }
-        .detail-card { background: var(--bg-card); padding: 20px; border-radius: 16px; margin-top: 20px; border: 1px solid var(--border); }
+        .cal-cell.success { background: rgba(52, 199, 89, 0.2); }
+        .cal-cell.fail { background: rgba(255, 59, 48, 0.2); }
+        .cal-date-num { position: absolute; top: 4px; right: 6px; font-size: 13px; font-weight: 600; color: var(--text-main); }
+        
+        /* 오늘과 선택한 날짜 시각적 분리 */
+        .cal-cell.today .cal-date-num { color: #007aff; font-size: 15px; font-weight: 800; }
+        .cal-cell.selected { border: 2px solid var(--text-main); transform: scale(1.05); z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        
+        /* 🌟 캘린더 안의 과목 표시 리스트 */
+        .cal-subject-list { position: absolute; top: 22px; left: 2px; right: 2px; bottom: 22px; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+        .cal-subject-item { font-size: 9px; font-weight: 700; color: var(--text-main); background: var(--glass-bg); padding: 2px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
 
-        /* 🌟 하단 네비게이션 글래스모피즘 적용 */
+        .cal-record { font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 8px; }
+        .cal-record.success { color: #2e7d32; } .cal-record.fail { color: #c62828; }
+        
+        .detail-card { padding: 20px; border-radius: 16px; margin-top: 20px; }
+
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); height: 70px; z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; height: 100%; cursor: pointer; color: #8e8e93; }
         .nav-item svg { stroke: var(--icon-stroke); transition: stroke 0.2s; }
         .nav-item.active svg { stroke: var(--icon-active); }
 
-        .setting-item { background: var(--bg-card); padding: 20px; border-radius: 14px; display: flex; justify-content: space-between; font-size: 17px; font-weight: 600; margin-bottom: 16px; border: 1px solid var(--border); flex-direction: column; align-items: stretch;}
+        .setting-item { padding: 20px; border-radius: 14px; display: flex; justify-content: space-between; font-size: 17px; font-weight: 600; margin-bottom: 16px; flex-direction: column; align-items: stretch;}
         .setting-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .toggle-switch { position: relative; width: 54px; height: 32px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
@@ -78,15 +114,16 @@
 
         .auth-container { margin-top: 20px; }
         .auth-input { width: 100%; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--cal-cell); color: var(--text-main); font-size: 16px; box-sizing: border-box;}
-        .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 8px;}
+        .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
+        .auth-btn:active { opacity: 0.7; }
         .btn-primary { background: #007aff; color: white; }
         .btn-secondary { background: var(--cal-cell); color: var(--text-main); border: 1px solid var(--border); }
         .divider { text-align: center; font-size: 14px; color: var(--text-sub); margin: 15px 0; }
 
-        /* 🌟 바텀 시트 (Bottom Sheet) 애니메이션 UI */
-        .modal-overlay { display: none; opacity: 0; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; transition: opacity 0.3s ease; }
+        /* 바텀 시트는 투명해지면 글씨가 겹치므로 솔리드 컬러 유지 */
+        .modal-overlay { display: none; opacity: 0; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; transition: opacity 0.3s ease; }
         .modal-overlay.show { display: block; opacity: 1; }
-        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--bg-card); border-radius: 24px 24px 0 0; padding: 24px 24px env(safe-area-inset-bottom) 24px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--bg-card-solid); border-radius: 24px 24px 0 0; padding: 24px 24px env(safe-area-inset-bottom) 24px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 -5px 20px rgba(0,0,0,0.2); }
         .modal-overlay.show .bottom-sheet { transform: translateY(0); }
         
         .drag-handle { width: 40px; height: 5px; background: #d1d1d6; border-radius: 3px; margin: 0 auto 20px auto; }
@@ -99,8 +136,7 @@
         .time-box { flex: 1; display: flex; align-items: center; border: 1px solid var(--border); border-radius: 12px; padding: 6px 14px; background: var(--cal-cell); }
         .time-box select { flex: 1; border: none; background: transparent; font-size: 20px; padding: 12px 0; outline: none; appearance: none; text-align: center; font-weight: 700; color: #007aff; }
 
-        /* 통계 차트 컨테이너 */
-        .chart-container { background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-top: 10px; }
+        .chart-container { padding: 20px; border-radius: 16px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -122,21 +158,20 @@
 
     <div id="calendar-view" class="view">
         <div class="header" style="padding: 10px 0 20px 0;"><span class="header-title">학습 기록</span></div>
-        <div class="cal-wrapper" id="cal-wrapper">
+        <div class="cal-wrapper glass-panel" id="cal-wrapper">
             <div class="cal-header"><button onclick="changeMonth(-1)">◀</button><span id="month-title"></span><button onclick="changeMonth(1)">▶</button></div>
             <div class="cal-day-row"><div class="cal-day-name" style="color:#ff3b30;">일</div><div class="cal-day-name">월</div><div class="cal-day-name">화</div><div class="cal-day-name">수</div><div class="cal-day-name">목</div><div class="cal-day-name">금</div><div class="cal-day-name" style="color:#007aff;">토</div></div>
             <div id="cal-grid" class="cal-grid"></div>
         </div>
-        <div id="day-detail" class="detail-card" style="display: none;">
+        <div id="day-detail" class="detail-card glass-panel" style="display: none;">
             <h3 id="detail-date" style="margin-top:0; font-size:18px;">상세 기록</h3>
             <ul id="detail-list" style="padding-left: 20px;"></ul>
         </div>
     </div>
 
-    <!-- 🌟 신규: 통계 뷰 -->
     <div id="stats-view" class="view">
         <div class="header" style="padding: 10px 0 20px 0;"><span class="header-title">과목별 분석</span></div>
-        <div class="chart-container">
+        <div class="chart-container glass-panel">
             <canvas id="statsChart"></canvas>
             <div id="no-stats-msg" style="display:none; text-align:center; color:var(--text-sub); padding:40px 0; font-weight:600;">기록된 학습 데이터가 없습니다.</div>
         </div>
@@ -144,12 +179,23 @@
 
     <div id="settings-view" class="view">
         <div class="header" style="padding: 10px 0 20px 0;"><span class="header-title">설정</span></div>
-        <div class="setting-item" style="flex-direction: row;">
+        
+        <!-- 🌟 배경화면 커스텀 업로드 -->
+        <div class="setting-item glass-panel" style="flex-direction: row; margin-bottom: 16px;">
+            <span>나만의 배경사진</span>
+            <div style="display:flex; gap:8px;">
+                <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="handleBgUpload(event)">
+                <button onclick="document.getElementById('bg-upload').click()" class="auth-btn btn-primary" style="width:auto; padding: 6px 12px; margin:0; font-size:14px;">선택</button>
+                <button onclick="clearBg()" class="auth-btn btn-secondary" style="width:auto; padding: 6px 12px; margin:0; color:#ff3b30; font-size:14px;">초기화</button>
+            </div>
+        </div>
+
+        <div class="setting-item glass-panel" style="flex-direction: row;">
             <span>다크 모드</span>
             <label class="toggle-switch"><input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()"><span class="slider"></span></label>
         </div>
         
-        <div class="setting-item">
+        <div class="setting-item glass-panel">
             <div id="auth-status-panel" class="setting-row" style="margin-bottom: 10px;">
                 <span id="auth-status-text">비회원 모드</span>
             </div>
@@ -168,17 +214,13 @@
     </div>
 
     <div class="bottom-nav">
-        <!-- 홈 -->
         <div class="nav-item active" id="nav-main" onclick="switchTab('main')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
-        <!-- 캘린더 -->
         <div class="nav-item" id="nav-calendar" onclick="switchTab('calendar')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
-        <!-- 🌟 통계 -->
         <div class="nav-item" id="nav-stats" onclick="switchTab('stats')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M212 212H24V24"></path><path d="M24 168L96 96L144 144L212 76"></path></svg><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
-        <!-- 설정 -->
         <div class="nav-item" id="nav-settings" onclick="switchTab('settings')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
     </div>
 
-    <!-- 🌟 세련된 바텀 시트 (Bottom Sheet) 모달 -->
+    <!-- 바텀 시트 (Bottom Sheet) 모달 -->
     <div id="form-modal" class="modal-overlay" onclick="closeModal(event)">
         <div class="bottom-sheet" onclick="event.stopPropagation()">
             <div class="drag-handle"></div>
@@ -200,7 +242,36 @@
                 google.accounts.id.initialize({ client_id: MY_GOOGLE_CLIENT_ID, callback: handleGoogleCredentialResponse });
                 google.accounts.id.renderButton(document.getElementById("google-btn"), { theme: "outline", size: "large", width: "100%", text: "continue_with" });
             }
+            loadBg(); // 배경화면 복구
         };
+
+        // 🌟 나만의 배경화면 업로드 및 용량 압축 (오류 방지)
+        function handleBgUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200; // 해상도 최적화
+                    let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) { height = Math.round(height * MAX_WIDTH / width); width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6); // 압축
+                    try {
+                        localStorage.setItem('planner_bg', base64);
+                        document.body.style.backgroundImage = `url(${base64})`;
+                    } catch(err) { alert('이미지 용량이 너무 커서 저장할 수 없습니다.'); }
+                }
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        function clearBg() { localStorage.removeItem('planner_bg'); document.body.style.backgroundImage = 'none'; }
+        function loadBg() { const bg = localStorage.getItem('planner_bg'); if (bg) document.body.style.backgroundImage = `url(${bg})`; }
 
         async function handleGoogleCredentialResponse(response) {
             const currentToken = getAuthToken(); 
@@ -232,7 +303,7 @@
                 document.getElementById('auth-form-container').style.display = 'none';
                 document.getElementById('logout-container').style.display = 'block';
             } else {
-                document.getElementById('auth-status-text').innerHTML = `비회원 모드 (기기 변경 시 데이터가 유실됩니다)`;
+                document.getElementById('auth-status-text').innerHTML = `비회원 모드 (데이터 유실 주의)`;
                 document.getElementById('auth-status-text').style.color = '#ff3b30';
                 document.getElementById('auth-form-container').style.display = 'block';
                 document.getElementById('logout-container').style.display = 'none';
@@ -268,22 +339,41 @@
         }
 
         let tasks = []; let activeTimerId = null; let timerInterval = null; let detailCache = {};
-        let viewingDate = new Date(); let selectedDays = []; let monthlyData = {};
-        let currentDetailDate = ""; 
+        let viewingDate = new Date(); let selectedDays = []; 
+        
+        let monthlyRecords = {}; // 서버에서 받아온 누적 데이터
+        let monthlyRoutines = []; // 내 루틴 목록
+        
+        // 초기 현재 상세 캘린더 날짜 (선택 표시용)
+        function toLocalISOString(date) { return (new Date(date - date.getTimezoneOffset() * 60000)).toISOString().split('T')[0]; }
+        let currentDetailDate = toLocalISOString(new Date()); 
 
-        // 🌟 다크모드 제어 (차트 색상 연동)
         function initTheme() { if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark-mode'); document.getElementById('dark-mode-toggle').checked = true; } }
         function toggleDarkMode() { 
             if (document.getElementById('dark-mode-toggle').checked) { document.body.classList.add('dark-mode'); localStorage.setItem('theme', 'dark'); } 
             else { document.body.classList.remove('dark-mode'); localStorage.setItem('theme', 'light'); }
-            if(myChart) loadStats(); // 다크모드 변경 시 차트 글씨색 새로고침
+            if(myChart) loadStats(); 
         }
         initTheme();
 
-        async function prefetchHeatmapData() { try { const res = await apiFetch('/api/heatmap/'); const data = await res.json(); monthlyData = {}; data.forEach(d => { monthlyData[d.date] = d; }); } catch (error) {} }
-        function toLocalISOString(date) { return (new Date(date - date.getTimezoneOffset() * 60000)).toISOString().split('T')[0]; }
+        // 🌟 수정된 데이터 프리패치 로직 (루틴+기록 함께 가져옴)
+        async function prefetchHeatmapData() { 
+            try { 
+                const res = await apiFetch('/api/heatmap/'); 
+                const data = await res.json(); 
+                monthlyRecords = {}; 
+                data.records.forEach(d => { monthlyRecords[d.date] = d; }); 
+                monthlyRoutines = data.routines;
+            } catch (error) {} 
+        }
+        
         function updateDateUI() { const days = ['일', '월', '화', '수', '목', '금', '토']; document.getElementById('current-date-display').textContent = `${viewingDate.getFullYear()}년 ${viewingDate.getMonth()+1}월 ${viewingDate.getDate()}일 (${days[viewingDate.getDay()]})`; }
-        function changeDate(offset) { if (activeTimerId) { toggleTimer(activeTimerId); } viewingDate.setDate(viewingDate.getDate() + offset); updateDateUI(); loadTasksForDate(); }
+        function changeDate(offset) { 
+            if (activeTimerId) { toggleTimer(activeTimerId); } 
+            viewingDate.setDate(viewingDate.getDate() + offset); updateDateUI(); 
+            currentDetailDate = toLocalISOString(viewingDate); // 날짜 변경 시 캘린더 선택칸도 동기화
+            loadTasksForDate(); renderCalendar();
+        }
         function toggleDay(dayIdx) { const idx = selectedDays.indexOf(dayIdx); if (idx > -1) selectedDays.splice(idx, 1); else selectedDays.push(dayIdx); document.querySelectorAll('.day-btn').forEach(btn => { if(selectedDays.includes(parseInt(btn.dataset.day))) btn.classList.add('active'); else btn.classList.remove('active'); }); }
         function initTimePickers() { const hSel = document.getElementById('target-hours'); const mSel = document.getElementById('target-minutes'); for(let i=0; i<=23; i++) hSel.innerHTML += `<option value="${i}">${i}</option>`; for(let i=0; i<=59; i++) mSel.innerHTML += `<option value="${i}">${i}</option>`; }
         initTimePickers();
@@ -309,7 +399,7 @@
                 container.innerHTML += `
                     <div class="task-wrapper">
                         <div class="swipe-actions"><button class="swipe-btn swipe-edit" onclick="openModal('edit', '${task.uuid}')">수정</button><button class="swipe-btn swipe-delete" onclick="confirmDelete('${task.uuid}')">삭제</button></div>
-                        <div class="task-item" id="task-${task.uuid}">
+                        <div class="task-item glass-panel" id="task-${task.uuid}">
                             <div class="task-info"><span class="task-title">${task.subject}</span><span class="task-time" id="time-${task.uuid}">${formatTime(task.seconds)}</span>${targetText}</div>
                             <div class="task-actions"><button id="btn-${task.uuid}" class="play-btn ${isRunning ? 'stop-btn' : ''}" onclick="toggleTimer('${task.uuid}')">${isRunning ? '■' : '▶'}</button><input type="checkbox" ${task.is_completed ? 'checked' : ''} onchange="toggleComplete('${task.uuid}', this.checked)"></div>
                         </div>
@@ -318,12 +408,9 @@
             attachSwipeEvents(); 
         }
 
-        // 🌟 바텀 시트 열기/닫기 로직 변경
         function openModal(mode, uuid = null) {
             const modal = document.getElementById('form-modal');
-            modal.style.display = 'block'; // 일단 보이게 하고
-            setTimeout(() => modal.classList.add('show'), 10); // 0.01초 뒤에 스르륵 애니메이션 발동
-
+            modal.style.display = 'block'; setTimeout(() => modal.classList.add('show'), 10);
             if (mode === 'register') {
                 document.getElementById('modal-title').textContent = '과목 등록'; document.getElementById('subject-input').value = '';
                 document.getElementById('target-hours').value = '0'; document.getElementById('target-minutes').value = '0';
@@ -340,8 +427,7 @@
         }
         function closeModal(e) { 
             const modal = document.getElementById('form-modal');
-            modal.classList.remove('show'); // 스르륵 내려가고
-            setTimeout(() => modal.style.display = 'none', 300); // 완전히 사라짐
+            modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300);
         }
 
         function submitForm(isEdit) {
@@ -363,34 +449,14 @@
             } else document.getElementById(`task-${uuid}`).style.transform = 'translateX(0px)';
         }
 
-        // 🌟 성능 최적화: 디바운싱(Debouncing) 적용된 타이머
         function toggleTimer(uuid) {
             const task = tasks.find(t => t.uuid === uuid); document.querySelectorAll('.task-item').forEach(el => el.style.transform = 'translateX(0px)');
-            
-            // 기존 켜져있는 타이머 정지 시 -> "서버 통신" 1회 발생
-            if (activeTimerId && activeTimerId !== uuid) { 
-                clearInterval(timerInterval); syncTaskToServer(activeTimerId); 
-                const prevBtn = document.getElementById(`btn-${activeTimerId}`); if(prevBtn) { prevBtn.innerHTML = '▶'; prevBtn.classList.remove('stop-btn'); } 
-            }
-            
+            if (activeTimerId && activeTimerId !== uuid) { clearInterval(timerInterval); syncTaskToServer(activeTimerId); const prevBtn = document.getElementById(`btn-${activeTimerId}`); if(prevBtn) { prevBtn.innerHTML = '▶'; prevBtn.classList.remove('stop-btn'); } }
             const btn = document.getElementById(`btn-${uuid}`);
-            if (activeTimerId === uuid) { 
-                // 내가 정지 버튼 누를 때 -> "서버 통신" 1회 발생 (10초마다 하던 낭비 제거!)
-                clearInterval(timerInterval); activeTimerId = null; btn.innerHTML = '▶'; btn.classList.remove('stop-btn'); syncTaskToServer(uuid);
-            } else { 
-                activeTimerId = uuid; btn.innerHTML = '■'; btn.classList.add('stop-btn'); 
-                // 화면의 숫자만 올려줌, 서버 통신 안함
-                timerInterval = setInterval(() => { 
-                    task.seconds++; document.getElementById(`time-${uuid}`).textContent = formatTime(task.seconds); 
-                }, 1000); 
-            }
+            if (activeTimerId === uuid) { clearInterval(timerInterval); activeTimerId = null; btn.innerHTML = '▶'; btn.classList.remove('stop-btn'); syncTaskToServer(uuid);
+            } else { activeTimerId = uuid; btn.innerHTML = '■'; btn.classList.add('stop-btn'); timerInterval = setInterval(() => { task.seconds++; document.getElementById(`time-${uuid}`).textContent = formatTime(task.seconds); }, 1000); }
         }
-
-        // 🌟 앱을 끄거나 홈 화면으로 나갈 때 돌아가던 타이머 즉시 저장
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden' && activeTimerId) { syncTaskToServer(activeTimerId); }
-        });
-
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && activeTimerId) { syncTaskToServer(activeTimerId); } });
         function toggleComplete(uuid, isChecked) { tasks.find(t => t.uuid === uuid).is_completed = isChecked; syncTaskToServer(uuid); }
 
         async function syncTaskToServer(uuid) {
@@ -404,24 +470,49 @@
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`${tabName}-view`).classList.add('active'); document.getElementById(`nav-${tabName}`).classList.add('active');
             if (tabName === 'calendar') renderCalendar();
-            // 🌟 통계 탭을 누르면 차트 그리기 함수 호출
             if (tabName === 'stats') loadStats();
         }
 
         let currentYear = new Date().getFullYear(); let currentMonth = new Date().getMonth();
 
+        // 🌟 고도화된 캘린더 그리기 (과목 리스트 및 오늘/선택 시각적 분리 적용)
         function renderCalendar() {
             document.getElementById('month-title').textContent = `${currentYear}년 ${currentMonth + 1}월`; const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
             const firstDay = new Date(currentYear, currentMonth, 1).getDay(); const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+
             for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="cal-cell empty"></div>`;
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const isToday = (new Date().getFullYear() === currentYear && new Date().getMonth() === currentMonth && new Date().getDate() === d);
-                const dayData = monthlyData[dateStr] || { value: 0, target: 0 };
+                const isToday = (today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === d);
+                const isSelected = (dateStr === currentDetailDate); // 내가 방금 클릭한 칸인지 확인
+
+                const dayData = monthlyRecords[dateStr] || { value: 0, target: 0, subjects: "" };
+                
+                // 해당 날짜에 들어갈 과목(루틴 + 과거기록) 추출
+                let dailySubjects = dayData.subjects ? dayData.subjects.split(',') : [];
+                const jsDay = new Date(currentYear, currentMonth, d).getDay();
+                monthlyRoutines.forEach(rt => {
+                    if (rt.repeat_days.includes(String(jsDay)) && !dailySubjects.includes(rt.subject)) {
+                        dailySubjects.push(rt.subject);
+                    }
+                });
+
+                // 과목을 화면에 그릴 HTML 태그로 변환 (최대 3개까지만 보여줌)
+                let subjectHtml = dailySubjects.slice(0, 3).map(sub => `<div class="cal-subject-item">${sub}</div>`).join('');
+                if(dailySubjects.length > 3) subjectHtml += `<div class="cal-subject-item">...</div>`;
+
                 let bgColorClass = '';
                 if (dayData.target > 0) bgColorClass = dayData.value >= dayData.target ? 'success' : (dayData.value > 0 ? 'fail' : ''); else if (dayData.value > 0) bgColorClass = 'success';
                 let recordBadge = dayData.value > 0 ? `<div class="cal-record ${bgColorClass}">${Math.floor(dayData.value/60)>0?Math.floor(dayData.value/60)+'h ':''}${dayData.value%60}m</div>` : '';
-                grid.innerHTML += `<div class="cal-cell ${bgColorClass}" style="${isToday ? 'border: 2px solid var(--icon-stroke);' : ''}" onclick="showDetail('${dateStr}')"><span class="cal-date-num">${d}</span>${recordBadge}</div>`;
+                
+                // 오늘과 선택날짜의 CSS 클래스 적용
+                grid.innerHTML += `
+                    <div class="cal-cell ${bgColorClass} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="showDetail('${dateStr}')">
+                        <span class="cal-date-num">${d}</span>
+                        <div class="cal-subject-list">${subjectHtml}</div>
+                        ${recordBadge}
+                    </div>`;
             }
         }
 
@@ -429,6 +520,8 @@
 
         function showDetail(dateStr) {
             currentDetailDate = dateStr; 
+            renderCalendar(); // 선택된 칸 효과 갱신을 위해 캘린더 다시 그리기
+
             document.getElementById('detail-date').textContent = `${dateStr} 상세 기록`; document.getElementById('day-detail').style.display = 'block';
             const list = document.getElementById('detail-list');
             if (detailCache[dateStr]) drawDetailList(detailCache[dateStr]); else list.innerHTML = '<li style="color:var(--text-sub); font-weight:600;">기록을 불러오는 중...</li>';
@@ -447,42 +540,19 @@
             }
         }
 
-        // 🌟 통계 차트 (Chart.js) 렌더링 로직
         let myChart = null;
         async function loadStats() {
-            const res = await apiFetch('/api/stats/');
-            const data = await res.json();
-            
-            const canvas = document.getElementById('statsChart');
-            const noMsg = document.getElementById('no-stats-msg');
-            
+            const res = await apiFetch('/api/stats/'); const data = await res.json();
+            const canvas = document.getElementById('statsChart'); const noMsg = document.getElementById('no-stats-msg');
             if(data.length === 0) { canvas.style.display = 'none'; noMsg.style.display = 'block'; return; }
             canvas.style.display = 'block'; noMsg.style.display = 'none';
-
-            const labels = data.map(d => d.subject);
-            const values = data.map(d => Math.floor(d.total_minutes / 60) + (d.total_minutes % 60) / 100); // 시간 단위로 대략 변환
-
+            const labels = data.map(d => d.subject); const values = data.map(d => Math.floor(d.total_minutes / 60) + (d.total_minutes % 60) / 100); 
             const textColor = getComputedStyle(document.body).getPropertyValue('--text-main').trim();
-
-            if(myChart) myChart.destroy(); // 기존 차트 지우고 새로 그리기
-            
+            if(myChart) myChart.destroy(); 
             myChart = new Chart(canvas, {
                 type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#5856d6', '#ff2d55'],
-                        borderWidth: 0, hoverOffset: 4
-                    }]
-                },
-                options: {
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { color: textColor, font: {family: '-apple-system'} } },
-                        tooltip: { callbacks: { label: function(context) { return ' 누적 ' + data[context.dataIndex].total_minutes + '분'; } } }
-                    },
-                    cutout: '70%' // 도넛 두께 얇게 세련되게
-                }
+                data: { labels: labels, datasets: [{ data: values, backgroundColor: ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#5856d6', '#ff2d55'], borderWidth: 0, hoverOffset: 4 }] },
+                options: { plugins: { legend: { position: 'bottom', labels: { color: textColor, font: {family: '-apple-system'} } }, tooltip: { callbacks: { label: function(context) { return ' 누적 ' + data[context.dataIndex].total_minutes + '분'; } } } }, cutout: '70%' }
             });
         }
 

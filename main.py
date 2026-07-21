@@ -79,7 +79,6 @@ def get_current_owner(request: Request) -> str:
         return f"user_{payload.get('user_id')}"
     except: return "guest"
 
-# --- 회원가입 / 로그인 API ---
 @app.post("/api/auth/google")
 async def google_login(data: GoogleAuth):
     try:
@@ -136,7 +135,6 @@ async def login(data: UserAuth):
     token = create_access_token(user['id'], user['username'])
     return {"message": "success", "token": token, "username": user['username']}
 
-# --- 플래너 API ---
 @app.get("/api/tasks/{query_date}")
 async def get_tasks(query_date: str, owner_id: str = Depends(get_current_owner)):
     conn = get_db_connection()
@@ -210,15 +208,31 @@ async def delete_task(task_type: str, task_id: int, owner_id: str = Depends(get_
     conn.close()
     return {"message": "deleted"}
 
+# 🌟 캘린더용 데이터 묶음 전송 (수정됨)
 @app.get("/api/heatmap/")
 async def get_heatmap(owner_id: str = Depends(get_current_owner)):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT TO_CHAR(study_date, 'YYYY-MM-DD') as date, SUM(duration_minutes) as total, SUM(target_minutes) as target FROM records WHERE owner_id = %s GROUP BY study_date", (owner_id,))
-    rows = cursor.fetchall()
+    # 1. 기록된 날짜별 누적 시간 및 과목 이름 묶음(STRING_AGG)
+    cursor.execute("""
+        SELECT TO_CHAR(study_date, 'YYYY-MM-DD') as date, 
+               SUM(duration_minutes) as total, SUM(target_minutes) as target, 
+               STRING_AGG(DISTINCT subject, ',') as subjects 
+        FROM records WHERE owner_id = %s GROUP BY study_date
+    """, (owner_id,))
+    records_rows = cursor.fetchall()
+    
+    # 2. 앞으로 해야 할 루틴 목록도 함께 전달
+    cursor.execute("SELECT subject, repeat_days FROM routines WHERE owner_id = %s", (owner_id,))
+    routines = cursor.fetchall()
+    
     cursor.close()
     conn.close()
-    return [{"date": row['date'], "value": row['total'], "target": row['target']} for row in rows]
+    
+    return {
+        "records": [{"date": r['date'], "value": r['total'], "target": r['target'], "subjects": r['subjects']} for r in records_rows],
+        "routines": routines
+    }
 
 @app.get("/api/records/date/{query_date}")
 async def get_daily_records(query_date: str, owner_id: str = Depends(get_current_owner)):
@@ -230,7 +244,6 @@ async def get_daily_records(query_date: str, owner_id: str = Depends(get_current
     conn.close()
     return records
 
-# 🌟 신규: 과목별 누적 통계 API
 @app.get("/api/stats/")
 async def get_stats(owner_id: str = Depends(get_current_owner)):
     conn = get_db_connection()
